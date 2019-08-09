@@ -36,7 +36,7 @@ namespace EasyUI
             else
             {
                 mask = CreateMask();
-                _defaultAnimation?.PlayDialogMaskEnterAnim(mask);
+                uiStack.defaultAnimation?.PlayDialogMaskEnterAnim(mask);
             }
 
             await base.OnEnter();
@@ -51,13 +51,13 @@ namespace EasyUI
             }
             else
             {
-                if (_defaultAnimation == null)
+                if (uiStack.defaultAnimation == null)
                 {
                     Destroy(m.gameObject); 
                 }
                 else
                 {
-                    _defaultAnimation.PlayDialogMaskExitAnim(m, () => Destroy(m.gameObject));
+                    uiStack.defaultAnimation.PlayDialogMaskExitAnim(m, () => Destroy(m.gameObject));
                 }
             }
             

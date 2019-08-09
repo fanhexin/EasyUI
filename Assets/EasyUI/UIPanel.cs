@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using UniRx;
 using UniRx.Async;
 using UnityEngine;
@@ -10,8 +9,6 @@ namespace EasyUI
     [RequireComponent(typeof(GraphicRaycaster))]
     public abstract class UIPanel : MonoBehaviour
     {
-        [SerializeField] PanelFactory _panelFactory;
-        [SerializeField] protected DefaultAnimation _defaultAnimation;
         [SerializeField] BindingTransition[] _bindingTransitions;
 
         Subject<Unit> _beginEnterSubject;
@@ -56,14 +53,6 @@ namespace EasyUI
 #if UNITY_EDITOR
         void Reset()
         {
-            _panelFactory = EditorUtil.FindAssets<PanelFactory>().FirstOrDefault();
-            if (_panelFactory == null)
-            {
-                throw new Exception("AbstractPanelFactory's implementation not found!");
-            }
-
-            _defaultAnimation = EditorUtil.FindAssets<DefaultAnimation>().FirstOrDefault();
-
             var rectTrans = GetComponent<RectTransform>();
             rectTrans.anchorMin = Vector2.zero;
             rectTrans.anchorMax = Vector2.one;
@@ -90,7 +79,7 @@ namespace EasyUI
             _beginExitSubject?.OnNext(Unit.Default);
             await OnExit();
             _endExitSubject?.OnNext(Unit.Default);
-            _panelFactory.RecyclePanel(this);
+            uiStack.panelFactory.RecyclePanel(this);
         }
 
         public async UniTask EnterBackground(UIPanel pushPanel)
@@ -120,9 +109,9 @@ namespace EasyUI
                 return _enterTask.Task;
             }
 
-            if (_defaultAnimation != null)
+            if (uiStack.defaultAnimation != null)
             {
-                _defaultAnimation.PlayEnterAnim(this, () => _enterTask.TrySetResult());
+                uiStack.defaultAnimation.PlayEnterAnim(this, () => _enterTask.TrySetResult());
                 return _enterTask.Task;
             }
             
@@ -143,9 +132,9 @@ namespace EasyUI
                 return;
             }
 
-            if (_defaultAnimation != null)
+            if (uiStack.defaultAnimation != null)
             {
-                _defaultAnimation.PlayExitAnim(this, () => _exitTask.TrySetResult());
+                uiStack.defaultAnimation.PlayExitAnim(this, () => _exitTask.TrySetResult());
                 await _exitTask.Task;
             }
         }
@@ -162,7 +151,7 @@ namespace EasyUI
 
         public async UniTask DoTransition<T>(Transition transition, T arg = default)
         {
-            var panel = await _panelFactory.CreatePanelAsync(transition.destPanelName);
+            var panel = await uiStack.panelFactory.CreatePanelAsync(transition.destPanelName);
             if (panel is IParameterReceiver<T> receiver)
             {
                 receiver.InputParameter(arg);    
@@ -172,7 +161,7 @@ namespace EasyUI
 
         public async UniTask DoTransition(Transition transition)
         {
-            var panel = await _panelFactory.CreatePanelAsync(transition.destPanelName);
+            var panel = await uiStack.panelFactory.CreatePanelAsync(transition.destPanelName);
             await DoOperation(panel, transition);
         }
 

@@ -164,8 +164,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66c1bab9fbc134de1babef791fca0b50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _panelFactory: {fileID: 11400000, guid: 54fc3f6ef8af84015b021fef76c237d2, type: 2}
-  _defaultAnimation: {fileID: 11400000, guid: dc296be8213ab4d47bc30c167d5a9e5e, type: 2}
   _bindingTransitions:
   - _destPanelName: BluePanel
     _disableUnderPanel: 1
@@ -1030,6 +1028,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a20b4be3f40334827929f82448761300, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _panelFactory: {fileID: 11400000, guid: 54fc3f6ef8af84015b021fef76c237d2, type: 2}
+  _defaultAnimation: {fileID: 11400000, guid: dc296be8213ab4d47bc30c167d5a9e5e, type: 2}
 --- !u!1 &2108342937
 GameObject:
   m_ObjectHideFlags: 0

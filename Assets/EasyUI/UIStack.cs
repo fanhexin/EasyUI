@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UniRx;
 using UniRx.Async;
@@ -12,6 +13,12 @@ namespace EasyUI
     [RequireComponent(typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster))]
     public class UIStack : MonoBehaviour
     {
+        [SerializeField] PanelFactory _panelFactory;
+        [SerializeField] DefaultAnimation _defaultAnimation;
+
+        public PanelFactory panelFactory => _panelFactory;
+        public DefaultAnimation defaultAnimation => _defaultAnimation;
+        
         Subject<UIPanel> _beginPushSubject;
         public IObservable<UIPanel> onBeginPush => _beginPushSubject ?? (_beginPushSubject = new Subject<UIPanel>());
 
@@ -39,6 +46,19 @@ namespace EasyUI
             set => _eventSystem.gameObject.SetActive(value);
         }
 
+#if UNITY_EDITOR
+        void Reset()
+        {
+            _panelFactory = EditorUtil.FindAssets<PanelFactory>().FirstOrDefault();
+            if (_panelFactory == null)
+            {
+                throw new Exception("PanelFactory's implementation not found!");
+            }
+
+            _defaultAnimation = EditorUtil.FindAssets<DefaultAnimation>().FirstOrDefault();
+        }
+#endif        
+        
         void Awake()
         {
             _eventSystem = FindObjectOfType<EventSystem>();
@@ -83,12 +103,16 @@ namespace EasyUI
             panel.transform.SetParent(transform, false);
             if (_panels.Count > 0)
             {
-                var underPanel = _panels.Peek();
-                await underPanel.EnterBackground(panel);
-                underPanel.gameObject.SetActive(!disableUnderPanel);
+                await _panels.Peek().EnterBackground(panel);
             }
 
             await panel.Enter();
+            
+            if (_panels.Count > 0)
+            {
+                _panels.Peek().gameObject.SetActive(!disableUnderPanel);
+            }
+            
             _panels.Push(panel);
             _endPushSubject?.OnNext(panel);
             interactable = true;
