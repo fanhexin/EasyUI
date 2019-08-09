@@ -14,7 +14,7 @@ namespace EasyUI
             Replace
         }
         
-        [SerializeField] string _destPanelName;
+        [SerializeField, PanelName] string _destPanelName;
         [SerializeField] bool _disableUnderPanel;
         [SerializeField] Operation _operation;
 
