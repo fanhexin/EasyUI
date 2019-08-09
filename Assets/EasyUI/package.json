@@ -1,0 +1,8 @@
+{
+    "name": "com.yj.easyui",
+    "displayName": "EasyUI",
+    "version": "1.0.0",
+    "unity": "2018.3",
+    "description": "简单的UI框架",
+    "keywords": ["ui", "ugui"]
+}
