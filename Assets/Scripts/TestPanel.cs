@@ -3,15 +3,17 @@ using System.Threading.Tasks;
 using EasyUI;
 using UniRx.Async;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class TestPanel : UIPanel
+public class TestPanel : UIPanel, IParameterReceiver<Color>
 {
-    [SerializeField] Transition _toBluePanel;
+    [SerializeField] Transition _toGreenPanel;
+    [SerializeField] Image _bkgImg;
 
     protected override async UniTask OnEnter()
     {
         await base.OnEnter();
-        if (_toBluePanel != null && !string.IsNullOrEmpty(_toBluePanel.destPanelName))
+        if (_toGreenPanel != null && !string.IsNullOrEmpty(_toGreenPanel.destPanelName))
         {
             DelayTransition();
         }
@@ -20,6 +22,11 @@ public class TestPanel : UIPanel
     async Task DelayTransition()
     {
         await UniTask.Delay(TimeSpan.FromSeconds(3));
-        DoTransition(_toBluePanel);
+        DoTransition(_toGreenPanel, Color.green);
+    }
+
+    public void InputParameter(Color bgColor)
+    {
+        _bkgImg.color = bgColor;
     }
 }

@@ -176,6 +176,7 @@ MonoBehaviour:
     _destPanelName: 
     _disableUnderPanel: 0
     _operation: 0
+  _bkgImg: {fileID: 5493229207104351414}
 --- !u!1 &7349521706993431611
 GameObject:
   m_ObjectHideFlags: 0

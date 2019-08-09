@@ -116,7 +116,7 @@ namespace EasyUI
             
             if (_animator != null)
             {
-                _animator.SetTrigger("panel_enter");
+                _animator.SetTrigger(Settings.instance.animatorEnterTriggerName);
                 return _enterTask.Task;
             }
 
@@ -138,8 +138,7 @@ namespace EasyUI
             
             if (_animator != null)
             {
-                _animator.SetTrigger("panel_exit");
-                
+                _animator.SetTrigger(Settings.instance.animatorExitTriggerName);
                 await _exitTask.Task;
                 return;
             }
@@ -161,9 +160,24 @@ namespace EasyUI
             return UniTask.CompletedTask;    
         }
 
+        public async UniTask DoTransition<T>(Transition transition, T arg = default)
+        {
+            var panel = await _panelFactory.CreatePanelAsync(transition.destPanelName);
+            if (panel is IParameterReceiver<T> receiver)
+            {
+                receiver.InputParameter(arg);    
+            }
+            await DoOperation(panel, transition);
+        }
+
         public async UniTask DoTransition(Transition transition)
         {
             var panel = await _panelFactory.CreatePanelAsync(transition.destPanelName);
+            await DoOperation(panel, transition);
+        }
+
+        async UniTask DoOperation(UIPanel panel, Transition transition)
+        {
             if (transition.operation == Transition.Operation.Push)
             {
                 await uiStack.Push(panel, transition.disableUnderPanel);

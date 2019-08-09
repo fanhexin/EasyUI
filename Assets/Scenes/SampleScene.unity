@@ -179,10 +179,11 @@ MonoBehaviour:
     _disableUnderPanel: 0
     _operation: 0
     _triggerBtn: {fileID: 266645367}
-  _toBluePanel:
+  _toGreenPanel:
     _destPanelName: 
     _disableUnderPanel: 0
     _operation: 0
+  _bkgImg: {fileID: 0}
 --- !u!1 &105265215
 GameObject:
   m_ObjectHideFlags: 0
