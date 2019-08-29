@@ -10,6 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 200eff822367e48a6a3160ca908d20fe, type: 3}
-  m_Name: Settings
+  m_Name: EasyUISettings
   m_EditorClassIdentifier: 
-  _dialogBkgColor: {r: 0, g: 0, b: 0, a: 0.5019608}
+  _dialogBkgColor: {r: 0, g: 0, b: 0, a: 0.5}
+  _enterTriggerName: panel_enter
+  _exitTriggerName: panel_exit
