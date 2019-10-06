@@ -1,8 +1,8 @@
 {
   "dependencies": {
+    "com.github.unirx": "https://github.com/fanhexin/UniRx.git#upm",
+    "com.github.unitask": "https://github.com/fanhexin/UniTask.git#upm",
     "com.unity.package-manager-ui": "2.0.7",
-    "com.yj.unirx": "http://192.168.0.254:8081/common/UniRx.git#upm",
-    "com.yj.unitask": "http://192.168.0.254:8081/fandongdong/UniTask.git#upm",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
     "com.unity.modules.assetbundle": "1.0.0",
@@ -35,12 +35,12 @@
     "com.unity.modules.xr": "1.0.0"
   },
   "lock": {
-    "com.yj.unitask": {
-      "hash": "4fcb59b4ce85e8e8aa897e7b4c7279131a56d6bd",
+    "com.github.unitask": {
+      "hash": "0f523f94ad8783f505a0e20edbee16cd67d8d209",
       "revision": "upm"
     },
-    "com.yj.unirx": {
-      "hash": "e544d94ec4338c76a532e11cf70f7ed12db7ae1c",
+    "com.github.unirx": {
+      "hash": "5f8c064ef4037b6e84a8d46028f01d708729ef8f",
       "revision": "upm"
     }
   }
