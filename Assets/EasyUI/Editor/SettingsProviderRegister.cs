@@ -7,7 +7,7 @@ namespace EasyUI.Editor
         [SettingsProvider]
         public static SettingsProvider CreateSettingsProvider()
         {
-            var provider = new SettingsProvider("Project/EasyUI")
+            var provider = new SettingsProvider("Project/EasyUI", SettingsScope.Project)
             {
                 label = "EasyUI",
                 guiHandler = context =>
