@@ -14,9 +14,9 @@ namespace EasyUI.Editor
         {
             if (_panelNames == null)
             {
-                _panelNames = EditorUtil.FindAssets<PanelFactory>()
-                    .FirstOrDefault()
-                    .products
+                _panelNames = EditorUtil.FindAssets<GameObject>()
+                    .Where(x => x.GetComponent<UIPanel>() != null)
+                    .Select(x => x.name)
                     .ToArray();
             }
             

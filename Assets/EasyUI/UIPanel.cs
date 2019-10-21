@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace EasyUI
 {
     [RequireComponent(typeof(GraphicRaycaster))]
-    public abstract class UIPanel : MonoBehaviour
+    public class UIPanel : MonoBehaviour
     {
         [SerializeField] BindingTransition[] _bindingTransitions;
 
