@@ -149,7 +149,7 @@ namespace EasyUI
             return UniTask.CompletedTask;    
         }
 
-        public async UniTask DoTransition<T>(Transition transition, T arg = default)
+        public async UniTask<UIPanel> DoTransition<T>(Transition transition, T arg = default)
         {
             var panel = await uiStack.panelFactory.CreatePanelAsync(transition.destPanelName);
             if (panel is IParameterReceiver<T> receiver)
@@ -157,12 +157,14 @@ namespace EasyUI
                 receiver.InputParameter(arg);    
             }
             await DoOperation(panel, transition);
+            return panel;
         }
 
-        public async UniTask DoTransition(Transition transition)
+        public async UniTask<UIPanel> DoTransition(Transition transition)
         {
             var panel = await uiStack.panelFactory.CreatePanelAsync(transition.destPanelName);
             await DoOperation(panel, transition);
+            return panel;
         }
 
         async UniTask DoOperation(UIPanel panel, Transition transition)
