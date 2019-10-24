@@ -11,6 +11,7 @@ namespace EasyUI.UGuiExtension.Editor
         SerializedProperty _itemPrefab;
         SerializedProperty _header;
         SerializedProperty _footer;
+        SerializedProperty _spacing;
 
         protected override void OnEnable()
         {
@@ -19,6 +20,7 @@ namespace EasyUI.UGuiExtension.Editor
             _itemPrefab = _target.EditorGetItemPrefabSp(serializedObject);
             _header = _target.EditorGetHeaderSp(serializedObject);
             _footer = _target.EditorGetFooterSp(serializedObject);
+            _spacing = _target.EditorGetSpacingSp(serializedObject);
         }
 
         public override void OnInspectorGUI()
@@ -32,6 +34,7 @@ namespace EasyUI.UGuiExtension.Editor
                 EditorGUILayout.PropertyField(_itemPrefab);
                 EditorGUILayout.PropertyField(_header);
                 EditorGUILayout.PropertyField(_footer);
+                EditorGUILayout.PropertyField(_spacing);
 
                 if (!cc.changed) return;
 

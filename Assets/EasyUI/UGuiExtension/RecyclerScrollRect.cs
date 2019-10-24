@@ -41,6 +41,11 @@ namespace EasyUI.UGuiExtension
         {
             return so.FindProperty(nameof(_footer));
         }
+        
+        public SerializedProperty EditorGetSpacingSp(SerializedObject so)
+        {
+            return so.FindProperty(nameof(_spacing));
+        }
 #endif
 
         readonly TopRecycler _topRecycler;
