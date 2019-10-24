@@ -1,6 +1,6 @@
 namespace EasyUI
 {
-    public interface IParameterReceiver<T>
+    public interface IParameterReceiver<in T>
     {
         void InputParameter(T arg);
     }
