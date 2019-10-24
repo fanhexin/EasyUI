@@ -5,7 +5,6 @@ using UnityEngine;
 
 namespace EasyUI
 {
-    [CreateAssetMenu(fileName = "Settings", menuName = "EasyUI/Settings")]
     public class Settings : ScriptableObject
     {
         const string FILE_NAME = "EasyUISettings";
