@@ -29,28 +29,34 @@ namespace EasyUI.UGuiExtension.Editor
             using (var cc = new EditorGUI.ChangeCheckScope())
             {
                 base.OnInspectorGUI();
-                if (cc.changed)
+                EditorGUILayout.PropertyField(_itemPrefab);
+                EditorGUILayout.PropertyField(_header);
+                EditorGUILayout.PropertyField(_footer);
+
+                if (!cc.changed) return;
+
+                RectTransform content = _target.content;
+                if (content != null)
                 {
                     if (vertical != _target.vertical && _target.vertical)
                     {
-                        _target.content.anchorMin = new Vector2(0, 1);
-                        _target.content.anchorMax = new Vector2(1, 1);
+                        content.anchorMin = new Vector2(0, 1);
+                        content.anchorMax = new Vector2(1, 1);
                         _target.horizontal = false;
                     }
                     else if (horizontal != _target.horizontal && _target.horizontal)
                     {
-                        _target.content.anchorMin = new Vector2(0, 0);     
-                        _target.content.anchorMax = new Vector2(0, 1);
+                        content.anchorMin = new Vector2(0, 0);     
+                        content.anchorMax = new Vector2(0, 1);
                         _target.vertical = false;
                     }
                     
-                    _target.content.offsetMax = Vector2.zero;
-                    _target.content.offsetMin = Vector2.zero;
+                    content.offsetMax = Vector2.zero;
+                    content.offsetMin = Vector2.zero;
                 }
+                    
+                serializedObject.ApplyModifiedProperties();
             }
-            EditorGUILayout.PropertyField(_itemPrefab);
-            EditorGUILayout.PropertyField(_header);
-            EditorGUILayout.PropertyField(_footer);
         }
     }
 }
