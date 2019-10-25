@@ -67,6 +67,14 @@ namespace EasyUI.UGuiExtension
 
         protected override void Start()
         {
+            // Ugui上start会被自动调用，做个Editor是否在运行的判断
+            #if UNITY_EDITOR
+            if (!EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                return;
+            }
+            #endif
+            
             if (vertical == horizontal)
             {
                 throw new Exception("Must be vertical or horizontal mode!");
@@ -77,6 +85,15 @@ namespace EasyUI.UGuiExtension
             FillContent();
             base.Start();
         }
+
+        #if UNITY_EDITOR
+        protected override void Reset()
+        {
+            base.Reset();
+            vertical = true;
+            horizontal = false;
+        }
+        #endif
 
         public void Reload()
         {
