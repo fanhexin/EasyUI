@@ -25,6 +25,7 @@ namespace EasyUI.UGuiExtension
         [SerializeField] RectTransform _header;
         [SerializeField] RectTransform _footer;
         [SerializeField] float _spacing;
+        [SerializeField] bool _loadOnStart = true;
         
 #if UNITY_EDITOR
         public SerializedProperty EditorGetItemPrefabSp(SerializedObject so)
@@ -46,6 +47,11 @@ namespace EasyUI.UGuiExtension
         {
             return so.FindProperty(nameof(_spacing));
         }
+        
+        public SerializedProperty EditorGetLoadOnStartSp(SerializedObject so)
+        {
+            return so.FindProperty(nameof(_loadOnStart));
+        }
 #endif
 
         readonly TopRecycler _topRecycler;
@@ -55,7 +61,7 @@ namespace EasyUI.UGuiExtension
         bool _isDragging;
         int _topItemIndex;
 
-        Rect _viewWorldRect;
+        Rect? _viewWorldRect;
         int _capacityCnt;
 
         protected RecyclerScrollRect()
@@ -80,9 +86,10 @@ namespace EasyUI.UGuiExtension
                 throw new Exception("Must be vertical or horizontal mode!");
             }
             
-            _viewWorldRect = viewport.GetWorldRect();
-            SetContentSize();
-            FillContent();
+            if (_loadOnStart)
+            {
+                Load();
+            }
             base.Start();
         }
 
@@ -95,6 +102,12 @@ namespace EasyUI.UGuiExtension
         }
         #endif
 
+        public void Load()
+        {
+            SetContentSize();
+            FillContent();
+        }
+        
         public void Reload()
         {
             // 无论之前滚动到哪，回到顶部
@@ -108,12 +121,16 @@ namespace EasyUI.UGuiExtension
             }
 
             ReturnItems();
-            SetContentSize();
-            FillContent();
+            Load();
         }
 
         void ReturnItems()
         {
+            if (_capacityCnt == 0)
+            {
+                return;
+            }
+            
             int startIndex = _header == null ? _capacityCnt - 1 : _capacityCnt;
             for (int i = startIndex; i >= 0; i--)
             {
@@ -210,9 +227,19 @@ namespace EasyUI.UGuiExtension
         {
             base.LateUpdate();
             
+            if (_capacityCnt == 0)
+            {
+                return;
+            }
+            
             if (!_isDragging && velocity == Vector2.zero)
             {
                 return;
+            }
+
+            if (_viewWorldRect == null)
+            {
+                _viewWorldRect = viewport.GetWorldRect();
             }
 
             _topRecycler.RecycleItems();
@@ -242,7 +269,7 @@ namespace EasyUI.UGuiExtension
                         .GetChild(startIndex + i * direction)
                         .GetComponent<RectTransform>();
                     
-                    if (_scrollRect._viewWorldRect.Overlaps(item.GetWorldRect()))
+                    if (_scrollRect._viewWorldRect.Value.Overlaps(item.GetWorldRect()))
                     {
                         return;
                     }
@@ -336,8 +363,8 @@ namespace EasyUI.UGuiExtension
 
             protected override void OnBeforeReturn(Transform instance)
             {
-                instance.SetParent(_scrollRect.viewport);
                 base.OnBeforeReturn(instance);
+                instance.SetParent(_scrollRect.viewport);
             }
         }
     }

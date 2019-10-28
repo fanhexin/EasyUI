@@ -12,6 +12,7 @@ namespace EasyUI.UGuiExtension.Editor
         SerializedProperty _header;
         SerializedProperty _footer;
         SerializedProperty _spacing;
+        SerializedProperty _loadOnStart;
 
         protected override void OnEnable()
         {
@@ -21,6 +22,7 @@ namespace EasyUI.UGuiExtension.Editor
             _header = _target.EditorGetHeaderSp(serializedObject);
             _footer = _target.EditorGetFooterSp(serializedObject);
             _spacing = _target.EditorGetSpacingSp(serializedObject);
+            _loadOnStart = _target.EditorGetLoadOnStartSp(serializedObject);
         }
 
         public override void OnInspectorGUI()
@@ -35,6 +37,7 @@ namespace EasyUI.UGuiExtension.Editor
                 EditorGUILayout.PropertyField(_header);
                 EditorGUILayout.PropertyField(_footer);
                 EditorGUILayout.PropertyField(_spacing);
+                EditorGUILayout.PropertyField(_loadOnStart);
 
                 if (!cc.changed) return;
 
