@@ -152,7 +152,8 @@ namespace EasyUI.UGuiExtension
                 side += GetRectSide(_footer.rect);
             }
 
-            side += adapter.ItemCount * GetRectSide(_itemPrefab.rect) + (adapter.ItemCount - 1) * _spacing;
+            float spaceSize = (adapter.ItemCount - 1 + (_header == null?0:1) + (_footer == null?0:1)) * _spacing;
+            side += adapter.ItemCount * GetRectSide(_itemPrefab.rect) + spaceSize;
             
             var contentSize = content.sizeDelta;
             if (vertical)
@@ -192,7 +193,7 @@ namespace EasyUI.UGuiExtension
             float pos = 0;
             if (_header != null)
             {
-                pos += GetRectSide(_header.rect);
+                pos += GetRectSide(_header.rect) + _spacing;
             }
 
             pos = GetRectSide(content.rect) * 0.5f -

@@ -370,7 +370,7 @@ MonoBehaviour:
     _operation: 0
     _triggerBtn: {fileID: 266645367}
   - _destPanelName: RecyclerListPanel
-    _disableUnderPanel: 0
+    _disableUnderPanel: 1
     _operation: 0
     _triggerBtn: {fileID: 29157268}
   _toGreenPanel:
