@@ -131,8 +131,9 @@ namespace EasyUI.UGuiExtension
                 return;
             }
             
-            int startIndex = _header == null ? _capacityCnt - 1 : _capacityCnt;
-            for (int i = startIndex; i >= 0; i--)
+            int startIndex = _footer == null ? _capacityCnt - 1 : _capacityCnt;
+            int endIndex = _header == null ? 0 : 1;
+            for (int i = startIndex; i >= endIndex; i--)
             {
                 _itemPool.Return(content.GetChild(i));
             }
