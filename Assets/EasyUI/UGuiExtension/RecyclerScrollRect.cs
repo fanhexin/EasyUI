@@ -24,6 +24,8 @@ namespace EasyUI.UGuiExtension
         [SerializeField] RectTransform _itemPrefab;
         [SerializeField] RectTransform _header;
         [SerializeField] RectTransform _footer;
+        [SerializeField] float _contentHeadPadding;
+        [SerializeField] float _contentFootPadding;
         [SerializeField] float _spacing;
         [SerializeField] bool _loadOnStart = true;
         
@@ -51,6 +53,16 @@ namespace EasyUI.UGuiExtension
         public SerializedProperty EditorGetLoadOnStartSp(SerializedObject so)
         {
             return so.FindProperty(nameof(_loadOnStart));
+        }
+        
+        public SerializedProperty EditorGetContentHeadPaddingSp(SerializedObject so)
+        {
+            return so.FindProperty(nameof(_contentHeadPadding));
+        }
+        
+        public SerializedProperty EditorGetContentFootPaddingSp(SerializedObject so)
+        {
+            return so.FindProperty(nameof(_contentFootPadding));
         }
 #endif
 
@@ -147,7 +159,7 @@ namespace EasyUI.UGuiExtension
 
         void SetContentSize()
         {
-            float side = 0;
+            float side = _contentHeadPadding + _contentFootPadding;
             
             if (_header != null)
             {
@@ -197,7 +209,7 @@ namespace EasyUI.UGuiExtension
 
         Vector2 GetItemPos(int index)
         {
-            float pos = 0;
+            float pos = _contentHeadPadding;
             if (_header != null)
             {
                 pos += GetRectSide(_header.rect) + _spacing;
