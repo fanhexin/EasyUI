@@ -78,6 +78,12 @@ namespace EasyUI.UGuiExtension
             _itemPool = new ItemPool(this);
         }
 
+        protected override void Awake()
+        {
+            base.Awake();
+            InitState();
+        }
+
         protected override void Start()
         {
             // Ugui上start会被自动调用，做个Editor是否在运行的判断
@@ -92,8 +98,6 @@ namespace EasyUI.UGuiExtension
             {
                 throw new Exception("Must be vertical or horizontal mode!");
             }
-
-            InitState();
             
             if (_loadOnStart)
             {
