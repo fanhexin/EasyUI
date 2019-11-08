@@ -130,11 +130,12 @@ namespace EasyUI.UGuiExtension
         
         public void Reload()
         {
-            // 无论之前滚动到哪，回到顶部
-            normalizedPosition = new Vector2{[_orientation] = _orientation};
-            
+            _lastNormalizedPos = _orientation;
             ReturnItems();
             Load();
+
+            // 无论之前滚动到哪，回到顶部
+            normalizedPosition = new Vector2{[_orientation] = _orientation};
         }
 
         void ReturnItems()
@@ -235,6 +236,11 @@ namespace EasyUI.UGuiExtension
         void UpdateByNormalizedPosChange(float value, int axis)
         {
             if (_capacityCnt == 0)
+            {
+                return;
+            }
+
+            if (axis != _orientation)
             {
                 return;
             }

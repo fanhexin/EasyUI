@@ -21,4 +21,16 @@ public class RecyclerListPanel : UIPanel, RecyclerScrollRect.IAdapter
     }
 
     int RecyclerScrollRect.IAdapter.ItemCount => _itemCount;
+
+    public void Filter()
+    {
+        _itemCount /= 2;
+        _scrollRect.Reload();
+    }
+
+    public void ClearFilter()
+    {
+        _itemCount *= 2;
+        _scrollRect.Reload();
+    }
 }
