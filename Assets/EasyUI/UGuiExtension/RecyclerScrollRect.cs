@@ -1,11 +1,10 @@
 using System;
-using EasyUI.UGuiExtension.Extension;
+using System.Collections.Generic;
 using UniRx.Toolkit;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace EasyUI.UGuiExtension
@@ -66,20 +65,16 @@ namespace EasyUI.UGuiExtension
         }
 #endif
 
-        readonly TopRecycler _topRecycler;
-        readonly BottomRecycler _bottomRecycler;
         readonly ItemPool _itemPool;
-        
-        bool _isDragging;
-        int _topItemIndex;
+        readonly LinkedList<(int index, RectTransform rectTrans)> _itemLinkedList = new LinkedList<(int, RectTransform)>();
 
-        Rect? _viewWorldRect;
+        int _orientation;
         int _capacityCnt;
+        float _lastNormalizedPos;
+        int _direction;
 
         protected RecyclerScrollRect()
         {
-            _topRecycler = new TopRecycler(this);
-            _bottomRecycler = new BottomRecycler(this);
             _itemPool = new ItemPool(this);
         }
 
@@ -97,6 +92,8 @@ namespace EasyUI.UGuiExtension
             {
                 throw new Exception("Must be vertical or horizontal mode!");
             }
+
+            InitState();
             
             if (_loadOnStart)
             {
@@ -105,14 +102,21 @@ namespace EasyUI.UGuiExtension
             base.Start();
         }
 
-        #if UNITY_EDITOR
+        void InitState()
+        {
+            _orientation = vertical ? 1 : 0;
+            _direction = 2 * _orientation - 1;
+            _lastNormalizedPos = _orientation;
+        }
+
+#if UNITY_EDITOR
         protected override void Reset()
         {
             base.Reset();
             vertical = true;
             horizontal = false;
         }
-        #endif
+#endif
 
         public void Load()
         {
@@ -123,15 +127,8 @@ namespace EasyUI.UGuiExtension
         public void Reload()
         {
             // 无论之前滚动到哪，回到顶部
-            if (vertical)
-            {
-                verticalNormalizedPosition = 1;
-            }
-            else
-            {
-                horizontalNormalizedPosition = 0;
-            }
-
+            normalizedPosition = new Vector2{[_orientation] = _orientation};
+            
             ReturnItems();
             Load();
         }
@@ -142,19 +139,13 @@ namespace EasyUI.UGuiExtension
             {
                 return;
             }
-
-            int startIndex = _capacityCnt - 1;
-            int endIndex = 0;
-            if (_header != null)
+            
+            foreach (var item in _itemLinkedList)
             {
-                startIndex += 1;
-                endIndex += 1;
+                _itemPool.Return(item.rectTrans);    
             }
-
-            for (int i = startIndex; i >= endIndex; i--)
-            {
-                _itemPool.Return(content.GetChild(i));
-            }
+            
+            _itemLinkedList.Clear();
         }
 
         void SetContentSize()
@@ -174,16 +165,7 @@ namespace EasyUI.UGuiExtension
             float spaceSize = (adapter.ItemCount - 1 + (_header == null?0:1) + (_footer == null?0:1)) * _spacing;
             side += adapter.ItemCount * GetRectSide(_itemPrefab.rect) + spaceSize;
             
-            var contentSize = content.sizeDelta;
-            if (vertical)
-            {
-                contentSize.y = side;
-            }
-            else
-            {
-                contentSize.x = side;
-            }
-            content.sizeDelta = contentSize;
+            content.SetSizeWithCurrentAnchors((RectTransform.Axis) _orientation, side);
         }
 
         void FillContent()
@@ -192,8 +174,6 @@ namespace EasyUI.UGuiExtension
             float itemSide = GetRectSide(_itemPrefab.rect);
 
             _capacityCnt = Mathf.Min(Mathf.CeilToInt(viewSide / (itemSide + _spacing)) + 1, adapter.ItemCount);
-            
-            _topItemIndex = 0;
             
             for (int i = 0; i < _capacityCnt; i++)
             {
@@ -204,6 +184,7 @@ namespace EasyUI.UGuiExtension
                     item.SetSiblingIndex(_footer.GetSiblingIndex());
                 }
                 adapter.OnBindView(i, item);
+                _itemLinkedList.AddLast((i, item));
             }
         }
 
@@ -215,150 +196,128 @@ namespace EasyUI.UGuiExtension
                 pos += GetRectSide(_header.rect) + _spacing;
             }
 
-            pos = GetRectSide(content.rect) * 0.5f -
-                   (pos + (index + 0.5f) * GetRectSide(_itemPrefab.rect) + _spacing * index);
+            pos = _direction * (GetRectSide(content.rect) * 0.5f -
+                   (pos + (index + 0.5f) * GetRectSide(_itemPrefab.rect) + _spacing * index));
 
-            if (horizontal)
+            return new Vector2 {[_orientation] = pos};
+        }
+
+        Vector2Int GetItemIndex(Vector2 pos)
+        {
+            float p = pos[_orientation] * _direction;
+            if (_header != null)
             {
-                pos = -pos;
+                p -= _header.rect.size[_orientation] + _spacing + _contentHeadPadding;
             }
-            
-            return vertical ? new Vector2(0, pos) : new Vector2(pos, 0);
+
+            float itemSide = _itemPrefab.rect.size[_orientation] + _spacing;
+            int topIndex = Mathf.FloorToInt(Mathf.Max(p, 0) / itemSide);
+            int bottomIndex = Mathf.FloorToInt((p + viewport.rect.size[_orientation]) / itemSide);
+            bottomIndex = Mathf.Min(adapter.ItemCount - 1, bottomIndex);
+            return new Vector2Int(topIndex, bottomIndex);
         }
 
         float GetRectSide(Rect rect)
         {
-            return vertical ? rect.height : rect.width;
+            return rect.size[_orientation];
         }
 
-        public override void OnBeginDrag(PointerEventData eventData)
+        protected override void SetNormalizedPosition(float value, int axis)
         {
-            base.OnBeginDrag(eventData);
-            _isDragging = true;
+            base.SetNormalizedPosition(value, axis);
+            UpdateByNormalizedPosChange(value, axis);
         }
 
-        public override void OnEndDrag(PointerEventData eventData)
+        void UpdateByNormalizedPosChange(float value, int axis)
         {
-            base.OnEndDrag(eventData);
-            _isDragging = false;
-        }
-
-        protected override void LateUpdate()
-        {
-            base.LateUpdate();
-            
             if (_capacityCnt == 0)
             {
                 return;
             }
-            
-            if (!_isDragging && velocity == Vector2.zero)
+
+            float delta = value - _lastNormalizedPos;
+            _lastNormalizedPos = value;
+
+            if (Mathf.Approximately(delta, 0))
             {
                 return;
             }
 
-            if (_viewWorldRect == null)
+            var index = GetItemIndex(content.anchoredPosition);
+            if (delta * _direction < 0)
             {
-                _viewWorldRect = viewport.GetWorldRect();
+                RecycleTopItems(index);
             }
-
-            _topRecycler.RecycleItems();
-            _bottomRecycler.RecycleItems();
+            else 
+            {
+                RecycleBottomItems(index);
+            }
         }
-        
-        abstract class Recycler 
-        {
-            protected readonly RecyclerScrollRect _scrollRect;
 
-            protected Recycler(RecyclerScrollRect scrollRect)
+        void RecycleTopItems(Vector2Int index)
+        {
+            int topIndex = index.x;
+            var item = _itemLinkedList.First;
+            if (topIndex > _itemLinkedList.Last.Value.index)
             {
-                _scrollRect = scrollRect;
-            }                
-            
-            protected abstract void MoveItem(RectTransform item);
-            protected abstract int sideIndex { get; set; }
-            protected abstract int startIndex { get; }
-            protected abstract int direction { get; }
-            protected abstract bool isOutOfRange(int index);
-            
-            public void RecycleItems()
-            {
-                for (int i = 0; ; i++)
+                int offset = Mathf.Max(0, topIndex + _capacityCnt - adapter.ItemCount);
+                topIndex -= offset;
+                
+                while (item != null && topIndex < adapter.ItemCount)
                 {
-                    var item = _scrollRect.content
-                        .GetChild(startIndex + i * direction)
-                        .GetComponent<RectTransform>();
-                    
-                    if (_scrollRect._viewWorldRect.Value.Overlaps(item.GetWorldRect()))
-                    {
-                        return;
-                    }
-
-                    int index = sideIndex + direction;
-                    if (isOutOfRange(index))
-                    {
-                        return;
-                    }
-                    
-                    sideIndex = index;
-                    item.anchoredPosition = _scrollRect.GetItemPos(sideIndex);
-                    MoveItem(item);
-                    _scrollRect.adapter.OnBindView(sideIndex, item);
+                    var v = item.Value;
+                    v.rectTrans.anchoredPosition = GetItemPos(topIndex);
+                    adapter.OnBindView(topIndex, v.rectTrans);
+                    item.Value = (topIndex, v.rectTrans);
+                    ++topIndex;
+                    item = item.Next;
                 }
+                return;
+            }
+
+            int bottomIndex = _itemLinkedList.Last.Value.index;
+            while (item != null && item.Value.index < topIndex && bottomIndex < adapter.ItemCount - 1)
+            {
+                var v = item.Value;
+                v.rectTrans.anchoredPosition = GetItemPos(++bottomIndex);
+                adapter.OnBindView(bottomIndex, v.rectTrans);
+                _itemLinkedList.RemoveFirst();
+                _itemLinkedList.AddLast((bottomIndex, v.rectTrans));
+                item = _itemLinkedList.First;
             }
         }
 
-        class TopRecycler : Recycler
+        void RecycleBottomItems(Vector2Int index)
         {
-            public TopRecycler(RecyclerScrollRect scrollRect) 
-                : base(scrollRect)
-            {
-            }
-
-            protected override void MoveItem(RectTransform item)
-            {
-                int index = _scrollRect.content.childCount - (_scrollRect._footer == null?1:2);
-                item.SetSiblingIndex(index);
-            }
-
-            protected override int sideIndex
-            {
-                get => _scrollRect._topItemIndex + _scrollRect._capacityCnt - 1;
-                set => _scrollRect._topItemIndex = value - _scrollRect._capacityCnt + 1;
-            }
-
-            protected override int startIndex => _scrollRect._header == null?0:1;
-            protected override int direction => 1;
-            protected override bool isOutOfRange(int index)
-            {
-                return index >= _scrollRect.adapter.ItemCount;
-            }
-        }
-
-        class BottomRecycler : Recycler
-        {
-            public BottomRecycler(RecyclerScrollRect scrollRect) 
-                : base(scrollRect)
-            {
-            }
-
-            protected override void MoveItem(RectTransform item)
-            {
-                item.SetSiblingIndex(_scrollRect._header == null?0:1);
-            }
-
-            protected override int sideIndex
-            {
-                get => _scrollRect._topItemIndex;
-                set => _scrollRect._topItemIndex = value;
-            }
-
-            protected override int startIndex => _scrollRect.content.childCount - (_scrollRect._footer == null?1:2);
-            protected override int direction => -1;
-            protected override bool isOutOfRange(int index)
-            {
-                return index < 0;
-            }
+             int bottomIndex = index.y;
+             var item = _itemLinkedList.Last;
+             if (bottomIndex < _itemLinkedList.First.Value.index)
+             {
+                 int offset = Mathf.Max(0, _capacityCnt - bottomIndex - 1);
+                 bottomIndex += offset;
+                 
+                 while (item != null && bottomIndex >= 0)
+                 {
+                     var v = item.Value;
+                     v.rectTrans.anchoredPosition = GetItemPos(bottomIndex);
+                     adapter.OnBindView(bottomIndex, v.rectTrans);
+                     item.Value = (bottomIndex, v.rectTrans);
+                     --bottomIndex;
+                     item = item.Previous;
+                 }
+                 return;
+             }
+ 
+             int topIndex = _itemLinkedList.First.Value.index;
+             while (item != null && item.Value.index > bottomIndex && topIndex > 0)
+             {
+                 var v = item.Value;
+                 v.rectTrans.anchoredPosition = GetItemPos(--topIndex);
+                 adapter.OnBindView(topIndex, v.rectTrans);
+                 _itemLinkedList.RemoveLast();
+                 _itemLinkedList.AddFirst((topIndex, v.rectTrans));
+                 item = _itemLinkedList.Last;
+             }           
         }
 
         class ItemPool : ObjectPool<Transform>
