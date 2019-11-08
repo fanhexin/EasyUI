@@ -238,7 +238,7 @@ namespace EasyUI.UGuiExtension
             float delta = value - _lastNormalizedPos;
             _lastNormalizedPos = value;
 
-            if (Mathf.Approximately(delta, 0))
+            if (velocity != Vector2.zero || Mathf.Approximately(delta, 0))
             {
                 return;
             }
@@ -249,6 +249,31 @@ namespace EasyUI.UGuiExtension
                 RecycleTopItems(index);
             }
             else 
+            {
+                RecycleBottomItems(index);
+            }
+        }
+
+        protected override void LateUpdate()
+        {
+            base.LateUpdate();
+            
+            if (_capacityCnt == 0)
+            {
+                return;
+            }
+
+            if (velocity == Vector2.zero)
+            {
+                return;
+            }
+            
+            var index = GetItemIndex(content.anchoredPosition);
+            if (velocity[_orientation] * _direction > 0)
+            {
+                RecycleTopItems(index);
+            }
+            else
             {
                 RecycleBottomItems(index);
             }
