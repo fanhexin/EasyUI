@@ -73,6 +73,7 @@ namespace EasyUI
             rectTrans.anchorMax = Vector2.one;
             rectTrans.offsetMin = Vector2.zero;
             rectTrans.offsetMax = Vector2.zero;
+            rectTrans.localScale = Vector3.one;
             rectTrans.SetSiblingIndex(transform.GetSiblingIndex());
             
             Image img = go.AddComponent<Image>();

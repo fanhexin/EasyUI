@@ -25,17 +25,6 @@ public class PrefabPanelFactory : PanelFactory
         _panelsDic = _panels.ToDictionary(x => x.name);
     }
 
-    public override IEnumerable<string> products
-    {
-        get
-        {
-            foreach (var uiPanel in _panels)
-            {
-                yield return uiPanel.name;
-            }
-        }
-    }
-
     public override async UniTask<UIPanel> CreatePanelAsync(string name)
     {
         if (!_panelsDic.TryGetValue(name, out var prefab))

@@ -149,20 +149,68 @@ namespace EasyUI
             return UniTask.CompletedTask;    
         }
 
-        public async UniTask DoTransition<T>(Transition transition, T arg = default)
+        void TransferParameter<T>(T arg = default)
         {
-            var panel = await uiStack.panelFactory.CreatePanelAsync(transition.destPanelName);
-            if (panel is IParameterReceiver<T> receiver)
-            {
-                receiver.InputParameter(arg);    
-            }
-            await DoOperation(panel, transition);
+            if (!(this is IParameterReceiver<T> receiver)) return;
+            receiver.InputParameter(arg);
         }
 
-        public async UniTask DoTransition(Transition transition)
+        UniTask<T> ReturnValue<T>()
+        {
+            if (this is IReturnValueProvider<T> provider)
+            {
+                return provider.returnValue;
+            }
+            
+            throw new Exception("Need implement IReturnValueProvider!");
+        }
+        
+        /// <summary>
+        /// 带输入参数的Transition
+        /// </summary>
+        /// <param name="transition"></param>
+        /// <param name="arg">输入参数值</param>
+        /// <typeparam name="T">输入参数类型</typeparam>
+        /// <returns></returns>
+        public async UniTask<UIPanel> DoTransition<T>(Transition transition, T arg = default)
+        {
+            var panel = await uiStack.panelFactory.CreatePanelAsync(transition.destPanelName);
+            panel.TransferParameter(arg);
+            await DoOperation(panel, transition);
+            return panel;
+        }
+
+        public async UniTask<UIPanel> DoTransition(Transition transition)
         {
             var panel = await uiStack.panelFactory.CreatePanelAsync(transition.destPanelName);
             await DoOperation(panel, transition);
+            return panel;
+        }
+
+        /// <summary>
+        /// 带返回值的Transition
+        /// </summary>
+        /// <param name="transition"></param>
+        /// <typeparam name="R">Panel返回值类型</typeparam>
+        /// <returns></returns>
+        public async UniTask<R> DoTransition<R>(Transition transition)
+        {
+            var panel = await DoTransition(transition);
+            return await panel.ReturnValue<R>();
+        }
+
+        /// <summary>
+        /// 带输入参数和返回值的Transition
+        /// </summary>
+        /// <param name="transition"></param>
+        /// <param name="arg">输入参数值</param>
+        /// <typeparam name="T">输入参数类型</typeparam>
+        /// <typeparam name="R">Panel返回值类型</typeparam>
+        /// <returns></returns>
+        public async UniTask<R> DoTransition<T, R>(Transition transition, T arg = default)
+        {
+            var panel = await DoTransition(transition, arg);
+            return await panel.ReturnValue<R>();
         }
 
         async UniTask DoOperation(UIPanel panel, Transition transition)
