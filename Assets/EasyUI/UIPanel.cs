@@ -46,7 +46,7 @@ namespace EasyUI
             _animator = GetComponent<Animator>();
             foreach (BindingTransition transition in _bindingTransitions)
             {
-                transition.triggerBtn.onClick.AddListener(() => DoTransition(transition));
+                transition.triggerBtn.onClick.AddListener(() => uiStack.DoTransition(transition));
             }
         }
         
@@ -79,7 +79,6 @@ namespace EasyUI
             _beginExitSubject?.OnNext(Unit.Default);
             await OnExit();
             _endExitSubject?.OnNext(Unit.Default);
-            uiStack.panelFactory.RecyclePanel(this);
         }
 
         public async UniTask EnterBackground(UIPanel pushPanel)
@@ -149,13 +148,13 @@ namespace EasyUI
             return UniTask.CompletedTask;    
         }
 
-        void TransferParameter<T>(T arg = default)
+        public void TransferParameter<T>(T arg = default)
         {
             if (!(this is IParameterReceiver<T> receiver)) return;
             receiver.InputParameter(arg);
         }
-
-        UniTask<T> ReturnValue<T>()
+        
+        public UniTask<T> ReturnValue<T>()
         {
             if (this is IReturnValueProvider<T> provider)
             {
@@ -163,66 +162,6 @@ namespace EasyUI
             }
             
             throw new Exception("Need implement IReturnValueProvider!");
-        }
-        
-        /// <summary>
-        /// 带输入参数的Transition
-        /// </summary>
-        /// <param name="transition"></param>
-        /// <param name="arg">输入参数值</param>
-        /// <typeparam name="T">输入参数类型</typeparam>
-        /// <returns></returns>
-        public async UniTask<UIPanel> DoTransition<T>(Transition transition, T arg = default)
-        {
-            var panel = await uiStack.panelFactory.CreatePanelAsync(transition.destPanelName);
-            panel.TransferParameter(arg);
-            await DoOperation(panel, transition);
-            return panel;
-        }
-
-        public async UniTask<UIPanel> DoTransition(Transition transition)
-        {
-            var panel = await uiStack.panelFactory.CreatePanelAsync(transition.destPanelName);
-            await DoOperation(panel, transition);
-            return panel;
-        }
-
-        /// <summary>
-        /// 带返回值的Transition
-        /// </summary>
-        /// <param name="transition"></param>
-        /// <typeparam name="R">Panel返回值类型</typeparam>
-        /// <returns></returns>
-        public async UniTask<R> DoTransition<R>(Transition transition)
-        {
-            var panel = await DoTransition(transition);
-            return await panel.ReturnValue<R>();
-        }
-
-        /// <summary>
-        /// 带输入参数和返回值的Transition
-        /// </summary>
-        /// <param name="transition"></param>
-        /// <param name="arg">输入参数值</param>
-        /// <typeparam name="T">输入参数类型</typeparam>
-        /// <typeparam name="R">Panel返回值类型</typeparam>
-        /// <returns></returns>
-        public async UniTask<R> DoTransition<T, R>(Transition transition, T arg = default)
-        {
-            var panel = await DoTransition(transition, arg);
-            return await panel.ReturnValue<R>();
-        }
-
-        async UniTask DoOperation(UIPanel panel, Transition transition)
-        {
-            if (transition.operation == Transition.Operation.Push)
-            {
-                await uiStack.Push(panel, transition.disableUnderPanel);
-            }
-            else if (transition.operation == Transition.Operation.Replace)
-            {
-                await uiStack.Replace(panel, transition.disableUnderPanel);
-            }
         }
 
         // 作为Animation event被调用
