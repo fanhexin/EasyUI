@@ -172,10 +172,10 @@ namespace EasyUI
             _isPoping = false;
         }
 
-        public async UniTask Replace(UIPanel panel)
+        public async UniTask Replace(UIPanel panel, bool disableUnderPanel = true)
         {
             await Pop();
-            await Push(panel);
+            await Push(panel, disableUnderPanel);
         }
     }
 }

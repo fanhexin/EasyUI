@@ -7,10 +7,20 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 7938601924903235453, guid: 5091e0b85975b4eb3b5a2045815b1c21,
+    - target: {fileID: 3473177370253930136, guid: 5091e0b85975b4eb3b5a2045815b1c21,
         type: 3}
-      propertyPath: m_Name
-      value: DialogPanel2
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4446228652986736549, guid: 5091e0b85975b4eb3b5a2045815b1c21,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7053758414344236957, guid: 5091e0b85975b4eb3b5a2045815b1c21,
+        type: 3}
+      propertyPath: m_Text
+      value: Dialog 2
       objectReference: {fileID: 0}
     - target: {fileID: 7938601924903235442, guid: 5091e0b85975b4eb3b5a2045815b1c21,
         type: 3}
@@ -117,15 +127,10 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 4446228652986736549, guid: 5091e0b85975b4eb3b5a2045815b1c21,
+    - target: {fileID: 7938601924903235453, guid: 5091e0b85975b4eb3b5a2045815b1c21,
         type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7053758414344236957, guid: 5091e0b85975b4eb3b5a2045815b1c21,
-        type: 3}
-      propertyPath: m_Text
-      value: Dialog 2
+      propertyPath: m_Name
+      value: DialogPanel2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5091e0b85975b4eb3b5a2045815b1c21, type: 3}

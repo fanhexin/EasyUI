@@ -221,7 +221,7 @@ namespace EasyUI
             }
             else if (transition.operation == Transition.Operation.Replace)
             {
-                await uiStack.Replace(panel);
+                await uiStack.Replace(panel, transition.disableUnderPanel);
             }
         }
 
