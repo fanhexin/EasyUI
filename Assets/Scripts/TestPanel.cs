@@ -22,7 +22,7 @@ public class TestPanel : UIPanel, IParameterReceiver<Color>
     async Task DelayTransition()
     {
         await UniTask.Delay(TimeSpan.FromSeconds(3));
-        DoTransition(_toGreenPanel, Color.green);
+        uiStack.DoTransition(_toGreenPanel, Color.green);
     }
 
     public void InputParameter(Color bgColor)

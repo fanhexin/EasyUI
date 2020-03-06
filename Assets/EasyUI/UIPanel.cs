@@ -154,7 +154,7 @@ namespace EasyUI
             receiver.InputParameter(arg);
         }
         
-        public UniTask<T> ReturnValue<T>()
+        public T ReturnValue<T>()
         {
             if (this is IReturnValueProvider<T> provider)
             {

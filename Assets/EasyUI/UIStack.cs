@@ -210,7 +210,8 @@ namespace EasyUI
         public async UniTask<R> DoTransition<R>(Transition transition)
         {
             var panel = await DoTransition(transition);
-            return await panel.ReturnValue<R>();
+            await panel.onEndExit;
+            return panel.ReturnValue<R>();
         }
 
         /// <summary>
@@ -224,7 +225,8 @@ namespace EasyUI
         public async UniTask<R> DoTransition<T, R>(Transition transition, T arg = default)
         {
             var panel = await DoTransition(transition, arg);
-            return await panel.ReturnValue<R>();
+            await panel.onEndExit;
+            return panel.ReturnValue<R>();
         }
 
         async UniTask DoOperation(UIPanel panel, Transition transition)
