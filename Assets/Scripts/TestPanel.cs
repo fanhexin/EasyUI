@@ -8,7 +8,9 @@ using UnityEngine.UI;
 public class TestPanel : UIPanel, IParameterReceiver<Color>
 {
     [SerializeField] Transition _toGreenPanel;
+    [SerializeField] Transition _toPickColorDlg;
     [SerializeField] Image _bkgImg;
+    [SerializeField] Button _toPickColorDlgBtn;
 
     protected override async UniTask OnEnter()
     {
@@ -16,6 +18,15 @@ public class TestPanel : UIPanel, IParameterReceiver<Color>
         if (_toGreenPanel != null && !string.IsNullOrEmpty(_toGreenPanel.destPanelName))
         {
             DelayTransition();
+        }
+
+        if (_toPickColorDlg != null)
+        {
+            _toPickColorDlgBtn.onClick.AddListener(async () =>
+            {
+                Color color = await uiStack.DoTransition<Color>(_toPickColorDlg);
+                _bkgImg.color = color;
+            });
         }
     }
 
