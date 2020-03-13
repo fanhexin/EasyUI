@@ -20,14 +20,11 @@ public class TestPanel : UIPanel, IParameterReceiver<Color>
             DelayTransition();
         }
 
-        if (_toPickColorDlg != null)
+        _toPickColorDlgBtn?.onClick.AddListener(async () =>
         {
-            _toPickColorDlgBtn.onClick.AddListener(async () =>
-            {
-                Color color = await uiStack.DoTransition<Color>(_toPickColorDlg);
-                _bkgImg.color = color;
-            });
-        }
+            Color color = await uiStack.DoTransition<Color>(_toPickColorDlg);
+            _bkgImg.color = color;
+        });
     }
 
     async Task DelayTransition()
