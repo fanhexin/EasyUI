@@ -16,7 +16,6 @@ namespace EasyUI
         [SerializeField] PanelFactory _panelFactory;
         [SerializeField] DefaultAnimation _defaultAnimation;
 
-        public PanelFactory panelFactory => _panelFactory;
         public DefaultAnimation defaultAnimation => _defaultAnimation;
         
         Subject<UIPanel> _beginPushSubject;
@@ -119,7 +118,7 @@ namespace EasyUI
             _isPushing = false;
         }
 
-        public async UniTask Pop(int num = 1)
+        public async UniTask Pop(int num = 1, bool disableUnderPanel = false)
         {
             if (num > _panels.Count)
             {
@@ -132,17 +131,17 @@ namespace EasyUI
                 return;
             }
 
-            await InternalPop(num);
+            await InternalPop(num, disableUnderPanel);
 
             if (_needPopNums.Value.Count == 0)
             {
                 return;
             }
             
-            await Pop(_needPopNums.Value.Dequeue());
+            await Pop(_needPopNums.Value.Dequeue(), disableUnderPanel);
         }
 
-        async Task InternalPop(int num)
+        async Task InternalPop(int num = 1, bool disableUnderPanel = false)
         {
             _isPoping = true;
             interactable = false;
@@ -155,7 +154,7 @@ namespace EasyUI
                 if (_panels.Count > 0)
                 {
                     underPanel = _panels.Peek();
-                    underPanel.gameObject.SetActive(true);
+                    underPanel.gameObject.SetActive(!disableUnderPanel);
                 }
                 
                 await panel.Exit();
@@ -175,7 +174,7 @@ namespace EasyUI
 
         private async UniTask Replace(UIPanel panel, bool disableUnderPanel = true)
         {
-            await Pop();
+            await Pop(1, disableUnderPanel);
             await Push(panel, disableUnderPanel);
         }
 
