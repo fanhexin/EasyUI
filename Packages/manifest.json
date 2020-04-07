@@ -1,7 +1,5 @@
 {
   "dependencies": {
-    "com.github.unirx": "https://github.com/fanhexin/UniRx.git#upm",
-    "com.github.unitask": "https://github.com/fanhexin/UniTask.git#upm",
     "com.unity.package-manager-ui": "2.0.8",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
@@ -32,16 +30,19 @@
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
-    "com.unity.modules.xr": "1.0.0"
+    "com.unity.modules.xr": "1.0.0",
+    "com.neuecc.unirx": "7.1.0",
+    "com.cysharp.unitask": "1.2.0"
   },
-  "lock": {
-    "com.github.unitask": {
-      "hash": "0f523f94ad8783f505a0e20edbee16cd67d8d209",
-      "revision": "upm"
-    },
-    "com.github.unirx": {
-      "hash": "5f8c064ef4037b6e84a8d46028f01d708729ef8f",
-      "revision": "upm"
+  "scopedRegistries": [
+    {
+      "name": "package.openupm.com",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.cysharp.unitask",
+        "com.neuecc.unirx",
+        "com.openupm"
+      ]
     }
-  }
+  ]
 }

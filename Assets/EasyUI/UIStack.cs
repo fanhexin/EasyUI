@@ -33,7 +33,8 @@ namespace EasyUI
         public UIPanel topPanel => _panels.Count > 0 ? _panels.Peek() : null;
         
         readonly Stack<UIPanel> _panels = new Stack<UIPanel>();
-        readonly Lazy<Queue<UIPanel>> _needPushPanels = new Lazy<Queue<UIPanel>>(() => new Queue<UIPanel>());
+        readonly Lazy<Queue<(UIPanel, bool)>> _needPushPanels = 
+            new Lazy<Queue<(UIPanel, bool)>>(() => new Queue<(UIPanel, bool)>());
         readonly Lazy<Queue<int>> _needPopNums = new Lazy<Queue<int>>(() => new Queue<int>());
 
         bool _isPushing;
@@ -77,7 +78,7 @@ namespace EasyUI
             if (_isPushing)
             {
                 panel.gameObject.SetActive(false);
-                _needPushPanels.Value.Enqueue(panel);
+                _needPushPanels.Value.Enqueue((panel, disableUnderPanel));
                 return;
             }
             
@@ -88,16 +89,16 @@ namespace EasyUI
                 return;
             }
             
-            UIPanel uiPanel = _needPushPanels.Value.Dequeue();
+            var (uiPanel, ifDisableUnderPanel) = _needPushPanels.Value.Dequeue();
             uiPanel.gameObject.SetActive(true);
-            await Push(uiPanel);
+            await Push(uiPanel, ifDisableUnderPanel);
         }
 
         async Task InternalPush(UIPanel panel, bool disableUnderPanel)
         {
+            _beginPushSubject?.OnNext(panel);
             _isPushing = true;
             interactable = false;
-            _beginPushSubject?.OnNext(panel);
             panel.uiStack = this;
             panel.transform.SetParent(transform, false);
             if (_panels.Count > 0)
@@ -113,9 +114,9 @@ namespace EasyUI
             }
             
             _panels.Push(panel);
-            _endPushSubject?.OnNext(panel);
             interactable = true;
             _isPushing = false;
+            _endPushSubject?.OnNext(panel);
         }
 
         public async UniTask Pop(int num = 1, bool disableUnderPanel = false)
