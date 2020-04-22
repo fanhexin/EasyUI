@@ -71,6 +71,8 @@ namespace EasyUI.UGuiExtension
         int _capacityCnt;
         float _lastNormalizedPos;
         int _direction;
+        private bool _isHeaderExisting;
+        private bool _isFooterExisting;
 
         protected RecyclerScrollRect()
         {
@@ -81,6 +83,9 @@ namespace EasyUI.UGuiExtension
         {
             base.Awake();
             InitState();
+            // 根据rider的提示，Unity的Object类型跟null比较时效率较低下，不应该在update中调用，从而做出的优化
+            _isHeaderExisting = _header != null;
+            _isFooterExisting = _footer != null;
         }
 
         protected override void Start()
@@ -156,17 +161,17 @@ namespace EasyUI.UGuiExtension
         {
             float side = _contentHeadPadding + _contentFootPadding;
             
-            if (_header != null)
+            if (_isHeaderExisting)
             {
                 side += GetRectSide(_header.rect);
             }
 
-            if (_footer != null)
+            if (_isFooterExisting)
             {
                 side += GetRectSide(_footer.rect);
             }
 
-            float spaceSize = (adapter.ItemCount - 1 + (_header == null?0:1) + (_footer == null?0:1)) * _spacing;
+            float spaceSize = (adapter.ItemCount - 1 + (_isHeaderExisting?1:0) + (_isFooterExisting?1:0)) * _spacing;
             side += adapter.ItemCount * GetRectSide(_itemPrefab.rect) + spaceSize;
             
             content.SetSizeWithCurrentAnchors((RectTransform.Axis) _orientation, side);
@@ -183,7 +188,7 @@ namespace EasyUI.UGuiExtension
             {
                 RectTransform item = _itemPool.Rent().GetComponent<RectTransform>();
                 item.anchoredPosition = GetItemPos(i);
-                if (_footer != null)
+                if (_isFooterExisting)
                 {
                     item.SetSiblingIndex(_footer.GetSiblingIndex());
                 }
@@ -195,7 +200,7 @@ namespace EasyUI.UGuiExtension
         Vector2 GetItemPos(int index)
         {
             float pos = _contentHeadPadding;
-            if (_header != null)
+            if (_isHeaderExisting)
             {
                 pos += GetRectSide(_header.rect) + _spacing;
             }
@@ -206,10 +211,10 @@ namespace EasyUI.UGuiExtension
             return new Vector2 {[_orientation] = pos};
         }
 
-        Vector2Int GetItemIndex(Vector2 pos)
+        Vector2Int GetItemIndex(in Vector2 pos)
         {
             float p = pos[_orientation] * _direction - _contentHeadPadding;
-            if (_header != null)
+            if (_isHeaderExisting)
             {
                 p -= _header.rect.size[_orientation] + _spacing;
             }
@@ -290,7 +295,7 @@ namespace EasyUI.UGuiExtension
             }
         }
 
-        void RecycleTopItems(Vector2Int index)
+        void RecycleTopItems(in Vector2Int index)
         {
             int topIndex = index.x;
             var item = _itemLinkedList.First;
@@ -323,7 +328,7 @@ namespace EasyUI.UGuiExtension
             }
         }
 
-        void RecycleBottomItems(Vector2Int index)
+        void RecycleBottomItems(in Vector2Int index)
         {
              int bottomIndex = index.y;
              var item = _itemLinkedList.Last;
@@ -359,11 +364,11 @@ namespace EasyUI.UGuiExtension
         void UpdateHeaderFooterActiveState(in Vector2 pos)
         {
             float len = pos[_orientation];
-            if (_header != null) 
+            if (_isHeaderExisting) 
                 _header.gameObject.SetActive(len < GetRectSide(_header.rect) + _contentHeadPadding);
             
-            if (_footer != null)
-                _footer?.gameObject.SetActive(GetRectSide(content.rect) - len - GetRectSide(viewport.rect)
+            if (_isFooterExisting)
+                _footer.gameObject.SetActive(GetRectSide(content.rect) - len - GetRectSide(viewport.rect)
                                               < GetRectSide(_footer.rect) + _contentFootPadding);
         }
 
