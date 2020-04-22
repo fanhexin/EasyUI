@@ -19,7 +19,6 @@ namespace EasyUI.UGuiExtension
         
         public IAdapter adapter { private get; set; }
         
-        // todo header和footer不可见后disable掉
         [SerializeField] RectTransform _itemPrefab;
         [SerializeField] RectTransform _header;
         [SerializeField] RectTransform _footer;
@@ -209,10 +208,10 @@ namespace EasyUI.UGuiExtension
 
         Vector2Int GetItemIndex(Vector2 pos)
         {
-            float p = pos[_orientation] * _direction;
+            float p = pos[_orientation] * _direction - _contentHeadPadding;
             if (_header != null)
             {
-                p -= _header.rect.size[_orientation] + _spacing + _contentHeadPadding;
+                p -= _header.rect.size[_orientation] + _spacing;
             }
 
             float itemSide = _itemPrefab.rect.size[_orientation] + _spacing;
@@ -222,7 +221,7 @@ namespace EasyUI.UGuiExtension
             return new Vector2Int(topIndex, bottomIndex);
         }
 
-        float GetRectSide(Rect rect)
+        float GetRectSide(in Rect rect)
         {
             return rect.size[_orientation];
         }
@@ -253,6 +252,7 @@ namespace EasyUI.UGuiExtension
                 return;
             }
 
+            UpdateHeaderFooterActiveState(content.anchoredPosition);
             var index = GetItemIndex(content.anchoredPosition);
             if (delta * _direction < 0)
             {
@@ -278,6 +278,7 @@ namespace EasyUI.UGuiExtension
                 return;
             }
             
+            UpdateHeaderFooterActiveState(content.anchoredPosition);
             var index = GetItemIndex(content.anchoredPosition);
             if (velocity[_orientation] * _direction > 0)
             {
@@ -353,6 +354,17 @@ namespace EasyUI.UGuiExtension
                  _itemLinkedList.AddFirst((topIndex, v.rectTrans));
                  item = _itemLinkedList.Last;
              }           
+        }
+
+        void UpdateHeaderFooterActiveState(in Vector2 pos)
+        {
+            float len = pos[_orientation];
+            if (_header != null) 
+                _header.gameObject.SetActive(len < GetRectSide(_header.rect) + _contentHeadPadding);
+            
+            if (_footer != null)
+                _footer?.gameObject.SetActive(GetRectSide(content.rect) - len - GetRectSide(viewport.rect)
+                                              < GetRectSide(_footer.rect) + _contentFootPadding);
         }
 
         class ItemPool : ObjectPool<Transform>
