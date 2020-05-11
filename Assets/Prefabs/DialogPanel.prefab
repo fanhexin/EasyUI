@@ -707,6 +707,7 @@ MonoBehaviour:
     _disableUnderPanel: 0
     _operation: 1
     _triggerBtn: {fileID: 6188572549042324991}
+  _tapMaskClose: 1
 --- !u!114 &3029825538702024982
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,4 +1,7 @@
+using System;
+using UniRx;
 using UniRx.Async;
+using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,6 +9,8 @@ namespace EasyUI
 {
     public class DialogPanel : UIPanel
     {
+        [SerializeField] private bool _tapMaskClose;
+
         Image mask
         {
             get
@@ -39,6 +44,16 @@ namespace EasyUI
                 uiStack.defaultAnimation?.PlayDialogMaskEnterAnim(mask);
             }
 
+            if (_tapMaskClose)
+            {
+                mask.OnPointerClickAsObservable()
+                    .Subscribe(_ =>
+                    {
+                        if (uiStack.topPanel == this)
+                            Close();
+                    }).AddTo(this);
+            }
+
             await base.OnEnter();
         }
 
@@ -60,7 +75,7 @@ namespace EasyUI
                     uiStack.defaultAnimation.PlayDialogMaskExitAnim(m, () => Destroy(m.gameObject));
                 }
             }
-            
+
             await base.OnExit();
         }
 
