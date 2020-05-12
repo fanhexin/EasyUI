@@ -134,7 +134,6 @@ namespace EasyUI.UGuiExtension
         
         public void Reload()
         {
-            _lastNormalizedPos = _orientation;
             ReturnItems();
             Load();
 
@@ -282,7 +281,8 @@ namespace EasyUI.UGuiExtension
             {
                 return;
             }
-            
+
+            _lastNormalizedPos = normalizedPosition[_orientation];
             UpdateHeaderFooterActiveState(content.anchoredPosition);
             var index = GetItemIndex(content.anchoredPosition);
             if (velocity[_orientation] * _direction > 0)
