@@ -36,6 +36,7 @@ namespace EasyUI
         readonly Lazy<Queue<(UIPanel, bool)>> _needPushPanels = 
             new Lazy<Queue<(UIPanel, bool)>>(() => new Queue<(UIPanel, bool)>());
         readonly Lazy<Queue<int>> _needPopNums = new Lazy<Queue<int>>(() => new Queue<int>());
+        readonly Lazy<Stack<UIPanel>> _topPanelsBak = new Lazy<Stack<UIPanel>>(() => new Stack<UIPanel>());
 
         bool _isPushing;
         bool _isPoping;
@@ -142,7 +143,7 @@ namespace EasyUI
             await Pop(_needPopNums.Value.Dequeue(), disableUnderPanel);
         }
 
-        async Task InternalPop(int num = 1, bool disableUnderPanel = false)
+        async Task InternalPop(int num = 1, bool disableUnderPanel = false, bool underPanelEnterForeground = true)
         {
             _isPoping = true;
             interactable = false;
@@ -160,7 +161,7 @@ namespace EasyUI
                 
                 await panel.Exit();
                 _panelFactory.RecyclePanel(panel);
-                if (underPanel != null)
+                if (underPanel != null && underPanelEnterForeground)
                 {
                     await underPanel.EnterForeground(panel);
                 }
@@ -176,6 +177,36 @@ namespace EasyUI
         {
             await Pop(1, disableUnderPanel);
             await Push(panel, disableUnderPanel);
+        }
+
+        /// <summary>
+        /// 根据距离栈顶的偏移量pop出栈顶下的panel
+        /// </summary>
+        /// <param name="offset">距离栈顶的偏移</param>
+        /// <param name="num">移除的数目</param>
+        public async UniTask Remove(int offset, int num = 1, bool disableUnderPanel = true)
+        {
+            if (offset < 0 || 
+                offset > _panels.Count - 1 ||
+                num < 1 ||
+                num > _panels.Count - offset)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            for (int i = 0; i < offset; i++)
+            {
+                _topPanelsBak.Value.Push(_panels.Pop());    
+            }
+
+            await InternalPop(num, disableUnderPanel, false);
+
+            for (int i = 0; i < offset; i++)
+            {
+                _panels.Push(_topPanelsBak.Value.Pop());    
+            }
+            
+            _topPanelsBak.Value.Clear();
         }
 
         /// <summary>
