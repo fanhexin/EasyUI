@@ -165,7 +165,6 @@ namespace EasyUI
                     await underPanel.EnterForeground(panel);
                 }
 
-                panel.uiStack = null;
                 _endPopSubject?.OnNext(panel);
             }
 
