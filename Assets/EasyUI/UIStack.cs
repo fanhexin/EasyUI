@@ -60,13 +60,14 @@ namespace EasyUI
         }
 #endif        
         
-        void Awake()
+        async void Awake()
         {
             _eventSystem = FindObjectOfType<EventSystem>();
-        }
-
-        async void Start()
-        {
+            if (_isPushing)
+            {
+                return;
+            }
+            
             UIPanel[] panels = GetComponentsInChildren<UIPanel>();
             foreach (UIPanel panel in panels)
             {
