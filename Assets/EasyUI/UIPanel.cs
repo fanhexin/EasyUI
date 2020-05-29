@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UniRx;
 using UniRx.Async;
 using UnityEngine;
@@ -97,45 +98,35 @@ namespace EasyUI
 
         protected virtual UniTask OnEnter()
         {
-            if (_enterTask == null)
-            {
-                _enterTask = new UniTaskCompletionSource();
-            }
-            
-            if (_animator != null)
-            {
-                _animator.SetTrigger(Settings.instance.animatorEnterTriggerName);
-                return _enterTask.Task;
-            }
-
-            if (uiStack.defaultAnimation != null)
-            {
-                uiStack.defaultAnimation.PlayEnterAnim(this, () => _enterTask.TrySetResult());
-                return _enterTask.Task;
-            }
-            
-            return UniTask.CompletedTask;
+            _enterTask = PlayAnimation(Settings.instance.animatorEnterTriggerName, anim => anim.PlayEnterAnim);
+            return _enterTask?.Task ?? UniTask.CompletedTask;
         }
 
-        protected virtual async UniTask OnExit()
+        protected virtual UniTask OnExit()
         {
-            if (_exitTask == null)
-            {
-                _exitTask = new UniTaskCompletionSource();
-            }
+            _exitTask = PlayAnimation(Settings.instance.animatorExitTriggerName, anim => anim.PlayExitAnim);
+            return _exitTask?.Task ?? UniTask.CompletedTask;
+        }
+
+        UniTaskCompletionSource PlayAnimation(string animatorTriggerName, Func<DefaultAnimation, Action<UIPanel, Action>> tweenAnimFn)
+        {
+            UniTaskCompletionSource utcs = null;    
             
-            if (_animator != null)
+            if (_animator != null && 
+                _animator.parameterCount > 0 &&
+                _animator.parameters.Any(x => 
+                    x.name == animatorTriggerName && x.type == AnimatorControllerParameterType.Trigger))
             {
-                _animator.SetTrigger(Settings.instance.animatorExitTriggerName);
-                await _exitTask.Task;
-                return;
+                utcs = new UniTaskCompletionSource();
+                _animator.SetTrigger(animatorTriggerName);
+            }
+            else if (uiStack.defaultAnimation != null)
+            {
+                utcs = new UniTaskCompletionSource();
+                tweenAnimFn(uiStack.defaultAnimation)(this, () => utcs.TrySetResult());
             }
 
-            if (uiStack.defaultAnimation != null)
-            {
-                uiStack.defaultAnimation.PlayExitAnim(this, () => _exitTask.TrySetResult());
-                await _exitTask.Task;
-            }
+            return utcs;
         }
 
         protected virtual UniTask OnEnterBackground(UIPanel pushPanel)
