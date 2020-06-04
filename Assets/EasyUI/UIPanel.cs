@@ -7,10 +7,36 @@ using UnityEngine.UI;
 
 namespace EasyUI
 {
-    [RequireComponent(typeof(GraphicRaycaster))]
+    [RequireComponent(typeof(GraphicRaycaster), typeof(RectTransform))]
     public class UIPanel : MonoBehaviour
     {
+        protected static SafeArea _safeArea;
+        public class SafeArea 
+        {
+            public float topOffset { get; internal set; }
+            public float bottomOffset { get; internal set; }
+            public float leftOffset { get; internal set; }
+            public float rightOffset { get; internal set; }
+        }
+        
+        [Serializable]
+        public class NotchAdapter
+        {
+            [SerializeField] private RectTransform _target;
+            [SerializeField] private bool _adjustTopOffset;
+            [SerializeField] private bool _adjustBottomOffset;
+            [SerializeField] private bool _adjustLeftOffset;
+            [SerializeField] private bool _adjustRightOffset;
+
+            public RectTransform target => _target;
+            public bool adjustTopOffset => _adjustTopOffset;
+            public bool adjustBottomOffset => _adjustBottomOffset;
+            public bool adjustLeftOffset => _adjustLeftOffset;
+            public bool adjustRightOffset => _adjustRightOffset;
+        }
+        
         [SerializeField] BindingTransition[] _bindingTransitions;
+        [SerializeField] private NotchAdapter _notchAdapter;
 
         Subject<Unit> _beginEnterSubject;
         public IObservable<Unit> onBeginEnter => _beginEnterSubject ?? (_beginEnterSubject = new Subject<Unit>());
@@ -35,15 +61,41 @@ namespace EasyUI
 
         Subject<Unit> _endEnterForegroundSubject;
         public IObservable<Unit> onEndEnterForeground => _endEnterForegroundSubject ?? (_endEnterForegroundSubject = new Subject<Unit>());
+
+        private UIStack _uiStack;
+
+        public UIStack uiStack
+        {
+            get => _uiStack;
+            internal set
+            {
+                _uiStack = value;
+                if (_safeArea != null)
+                {
+                    return;
+                }
+
+                var canvasRectTransform = _uiStack.GetComponent<RectTransform>();
+                float heightFactor = Screen.height / canvasRectTransform.rect.height;
+                float widthFactor = Screen.width / canvasRectTransform.rect.width;
+                _safeArea = new SafeArea
+                {
+                    topOffset = (Screen.height - Screen.safeArea.yMax) * heightFactor,
+                    bottomOffset = Screen.safeArea.yMin * heightFactor,
+                    leftOffset = Screen.safeArea.xMin * widthFactor,
+                    rightOffset = (Screen.width - Screen.safeArea.xMax)  * widthFactor
+                };
+            }
+        }
         
-        public UIStack uiStack { get; set; }
-        
+        public RectTransform rectTransform { get; private set; }
         Animator _animator;
         UniTaskCompletionSource _enterTask;
         UniTaskCompletionSource _exitTask;
 
         protected virtual void Awake()
         {
+            rectTransform = GetComponent<RectTransform>();
             _animator = GetComponent<Animator>();
             foreach (BindingTransition transition in _bindingTransitions)
             {
@@ -71,14 +123,45 @@ namespace EasyUI
         public async UniTask Enter()
         {
             _beginEnterSubject?.OnNext(Unit.Default);
+            AdaptNotch();
             await OnEnter();
             _endEnterSubject?.OnNext(Unit.Default);
+        }
+
+        /// <summary>
+        /// 异形屏适配
+        /// </summary>
+        /// <param name="direction">取1或-1</param>
+        private void AdaptNotch(int direction = 1)
+        {
+            RectTransform target = _notchAdapter.target == null ? rectTransform : _notchAdapter.target;
+            if (_notchAdapter.adjustTopOffset)
+            {
+                target.offsetMax -= _safeArea.topOffset * direction * Vector2.up;
+            }
+
+            if (_notchAdapter.adjustBottomOffset)
+            {
+                target.offsetMin += _safeArea.bottomOffset * direction * Vector2.up;
+            }
+
+            if (_notchAdapter.adjustLeftOffset)
+            {
+                target.offsetMin += _safeArea.leftOffset * direction * Vector2.right;
+            }
+
+            if (_notchAdapter.adjustRightOffset)
+            {
+                target.offsetMax -= _safeArea.rightOffset * direction * Vector2.right;
+            }
         }
 
         public async UniTask Exit()
         {
             _beginExitSubject?.OnNext(Unit.Default);
             await OnExit();
+            // 还原异形屏适配效果，避免Panel实例重用时不断OnEnter适配过头
+            AdaptNotch(-1);
             _endExitSubject?.OnNext(Unit.Default);
         }
 
