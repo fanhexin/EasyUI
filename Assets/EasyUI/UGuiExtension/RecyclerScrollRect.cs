@@ -26,6 +26,24 @@ namespace EasyUI.UGuiExtension
         [SerializeField] float _contentFootPadding;
         [SerializeField] float _spacing;
         [SerializeField] bool _loadOnStart = true;
+
+        public float contentHeadPadding
+        {
+            get => _contentHeadPadding;
+            set => _contentHeadPadding = value;
+        }
+
+        public float contentFootPadding
+        {
+            get => _contentFootPadding;
+            set => _contentFootPadding = value;
+        }
+
+        public float spacing
+        {
+            get => _spacing;
+            set => _spacing = value;
+        }
         
 #if UNITY_EDITOR
         public SerializedProperty EditorGetItemPrefabSp(SerializedObject so)

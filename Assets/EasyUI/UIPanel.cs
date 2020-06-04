@@ -28,15 +28,37 @@ namespace EasyUI
             [SerializeField] private bool _adjustLeftOffset;
             [SerializeField] private bool _adjustRightOffset;
 
-            public RectTransform target => _target;
-            public bool adjustTopOffset => _adjustTopOffset;
-            public bool adjustBottomOffset => _adjustBottomOffset;
-            public bool adjustLeftOffset => _adjustLeftOffset;
-            public bool adjustRightOffset => _adjustRightOffset;
+            public void Apply(int direction)
+            {
+                if (_target == null)
+                {
+                    return;
+                }
+                
+                if (_adjustTopOffset)
+                {
+                    _target.offsetMax -= _safeArea.topOffset * direction * Vector2.up;
+                }
+
+                if (_adjustBottomOffset)
+                {
+                    _target.offsetMin += _safeArea.bottomOffset * direction * Vector2.up;
+                }
+
+                if (_adjustLeftOffset)
+                {
+                    _target.offsetMin += _safeArea.leftOffset * direction * Vector2.right;
+                }
+
+                if (_adjustRightOffset)
+                {
+                    _target.offsetMax -= _safeArea.rightOffset * direction * Vector2.right;
+                }    
+            }
         }
         
         [SerializeField] BindingTransition[] _bindingTransitions;
-        [SerializeField] private NotchAdapter _notchAdapter;
+        [SerializeField] private NotchAdapter[] _notchAdapters;
 
         Subject<Unit> _beginEnterSubject;
         public IObservable<Unit> onBeginEnter => _beginEnterSubject ?? (_beginEnterSubject = new Subject<Unit>());
@@ -134,25 +156,14 @@ namespace EasyUI
         /// <param name="direction">取1或-1</param>
         private void AdaptNotch(int direction = 1)
         {
-            RectTransform target = _notchAdapter.target == null ? rectTransform : _notchAdapter.target;
-            if (_notchAdapter.adjustTopOffset)
+            if (_notchAdapters == null)
             {
-                target.offsetMax -= _safeArea.topOffset * direction * Vector2.up;
+                return;
             }
-
-            if (_notchAdapter.adjustBottomOffset)
+            
+            foreach (NotchAdapter adapter in _notchAdapters)
             {
-                target.offsetMin += _safeArea.bottomOffset * direction * Vector2.up;
-            }
-
-            if (_notchAdapter.adjustLeftOffset)
-            {
-                target.offsetMin += _safeArea.leftOffset * direction * Vector2.right;
-            }
-
-            if (_notchAdapter.adjustRightOffset)
-            {
-                target.offsetMax -= _safeArea.rightOffset * direction * Vector2.right;
+                adapter.Apply(direction);
             }
         }
 
