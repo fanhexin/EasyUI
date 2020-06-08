@@ -219,6 +219,8 @@ namespace EasyUI
         /// <returns></returns>
         public async UniTask<UIPanel> DoTransition<T>(Transition transition, T arg = default)
         {
+            // 在Factory创建Panel之前就要禁用触控，否则快速点击时可能会创建多个相同Panel
+            interactable = false;
             var panel = await _panelFactory.CreatePanelAsync(transition.destPanelName);
             panel.TransferParameter(arg);
             await DoOperation(panel, transition);
@@ -227,6 +229,7 @@ namespace EasyUI
 
         public async UniTask<UIPanel> DoTransition(Transition transition)
         {
+            interactable = false;
             var panel = await _panelFactory.CreatePanelAsync(transition.destPanelName);
             await DoOperation(panel, transition);
             return panel;
