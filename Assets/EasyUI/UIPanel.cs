@@ -261,5 +261,28 @@ namespace EasyUI
         {
             _exitTask?.TrySetResult();
         }
+        
+        UIPanel GetUnderPanel(int index)
+        {
+            if (--index < 0)
+            {
+                return null;
+            }
+
+            var underPanel = uiStack.transform
+                .GetChild(index)
+                .GetComponent<UIPanel>();
+            if (underPanel != null)
+            {
+                return underPanel;
+            }
+
+            return GetUnderPanel(index);
+        }
+
+        /// <summary>
+        /// 获取被当前界面盖住的界面
+        /// </summary>
+        public UIPanel underPanel => GetUnderPanel(transform.GetSiblingIndex());
     }
 }
