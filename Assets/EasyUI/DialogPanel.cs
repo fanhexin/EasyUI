@@ -1,4 +1,3 @@
-using System;
 using UniRx;
 using UniRx.Async;
 using UniRx.Triggers;
@@ -9,25 +8,22 @@ namespace EasyUI
 {
     public class DialogPanel : UIPanel
     {
-        [SerializeField] private bool _tapMaskClose;
+        [SerializeField] bool _tapMaskClose;
 
-        Image mask
+        protected Image GetMask()
         {
-            get
+            var item = uiStack.transform.GetChild(transform.GetSiblingIndex() - 1);
+            if (item == null)
             {
-                var item = uiStack.transform.GetChild(transform.GetSiblingIndex() - 1);
-                if (item == null)
-                {
-                    return null;
-                }
-
-                if (item.name != "Mask")
-                {
-                    return null;
-                }
-
-                return item.GetComponent<Image>();
+                return null;
             }
+
+            if (item.name != "Mask")
+            {
+                return null;
+            }
+
+            return item.GetComponent<Image>();
         }
 
         protected override async UniTask OnEnter()
@@ -35,7 +31,7 @@ namespace EasyUI
             Image mask;
             if (uiStack.topPanel is DialogPanel panel)
             {
-                mask = panel.mask;
+                mask = panel.GetMask();
                 mask.rectTransform.SetSiblingIndex(panel.transform.GetSiblingIndex());
             }
             else
@@ -59,7 +55,7 @@ namespace EasyUI
 
         protected override async UniTask OnExit()
         {
-            var m = mask;
+            var m = GetMask();
             if (uiStack.topPanel is DialogPanel panel)
             {
                 m.rectTransform.SetSiblingIndex(panel.transform.GetSiblingIndex());
