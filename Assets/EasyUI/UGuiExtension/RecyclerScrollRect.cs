@@ -30,13 +30,21 @@ namespace EasyUI.UGuiExtension
         public float contentHeadPadding
         {
             get => _contentHeadPadding;
-            set => _contentHeadPadding = value;
+            set
+            {
+                _contentHeadPadding = value;
+                UpdateHeaderAnchorPos(_contentHeadPadding);
+            }
         }
 
         public float contentFootPadding
         {
             get => _contentFootPadding;
-            set => _contentFootPadding = value;
+            set
+            {
+                _contentFootPadding = value;
+                UpdateFooterAnchorPos(_contentFootPadding);
+            }
         }
 
         public float spacing
@@ -390,6 +398,37 @@ namespace EasyUI.UGuiExtension
                                               < GetRectSide(_footer.rect) + _contentFootPadding);
         }
 
+        void UpdateHeaderOrFooterAnchorPos(RectTransform rectTransform, float padding, int factor)
+        {
+            if (rectTransform == null)
+            {
+                return;
+            }
+            
+            var pos = rectTransform.anchoredPosition;
+            if (vertical)
+            {
+                pos.x = 0;
+                pos.y = factor * padding;
+            }
+            else
+            {
+                pos.x = -factor * padding;
+                pos.y = 0;
+            }
+            rectTransform.anchoredPosition = pos;
+        }
+
+        public void UpdateHeaderAnchorPos(float padding)
+        {
+            UpdateHeaderOrFooterAnchorPos(_header, padding, -1);
+        }
+
+        public void UpdateFooterAnchorPos(float padding)
+        {
+            UpdateHeaderOrFooterAnchorPos(_footer, padding, 1);
+        }
+        
         class ItemPool : ObjectPool<Transform>
         {
             readonly RecyclerScrollRect _scrollRect;

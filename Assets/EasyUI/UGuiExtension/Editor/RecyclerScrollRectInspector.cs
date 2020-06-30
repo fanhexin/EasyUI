@@ -86,12 +86,12 @@ namespace EasyUI.UGuiExtension.Editor
 
                 if (contentHeadPadding != _contentHeadPadding.floatValue)
                 {
-                    UpdateHeaderAnchorPos();
+                    _target.UpdateHeaderAnchorPos(_contentHeadPadding.floatValue);
                 }
 
                 if (contentFootPadding != _contentFootPadding.floatValue)
                 {
-                    UpdateFooterAnchorPos();
+                    _target.UpdateFooterAnchorPos(_contentFootPadding.floatValue);
                 }
                     
                 serializedObject.ApplyModifiedProperties();
@@ -162,41 +162,8 @@ namespace EasyUI.UGuiExtension.Editor
 
         void UpdateHeaderAndFooterAnchorPos()
         {
-            UpdateHeaderAnchorPos();
-            UpdateFooterAnchorPos();
-        }
-
-        void UpdateHeaderAnchorPos()
-        {
-            UpdateHeaderOrFooterAnchorPos(_header, _contentHeadPadding, -1);
-        }
-
-        void UpdateFooterAnchorPos()
-        {
-            UpdateHeaderOrFooterAnchorPos(_footer, _contentFootPadding, 1);
-        }
-
-        void UpdateHeaderOrFooterAnchorPos(SerializedProperty sp, SerializedProperty padding, int factor)
-        {
-            if (sp.objectReferenceValue == null)
-            {
-                return;
-            }
-
-            Undo.RecordObject(sp.objectReferenceValue, "UpdateAnchorPos");
-            var rectTrans = sp.objectReferenceValue as RectTransform;
-            var pos = rectTrans.anchoredPosition;
-            if (_target.vertical)
-            {
-                pos.x = 0;
-                pos.y = factor * padding.floatValue;
-            }
-            else
-            {
-                pos.x = -factor * padding.floatValue;
-                pos.y = 0;
-            }
-            rectTrans.anchoredPosition = pos;
+            _target.UpdateHeaderAnchorPos(_contentHeadPadding.floatValue);
+            _target.UpdateFooterAnchorPos(_contentFootPadding.floatValue);
         }
     }
 }
