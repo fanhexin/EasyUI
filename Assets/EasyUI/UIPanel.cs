@@ -59,6 +59,7 @@ namespace EasyUI
         
         [SerializeField] BindingTransition[] _bindingTransitions;
         [SerializeField] private NotchAdapter[] _notchAdapters;
+        [SerializeField, Tooltip("OnExit时是否重置异形屏适配效果")] bool _resetNotchOnExit;
 
         Subject<Unit> _beginEnterSubject;
         public IObservable<Unit> onBeginEnter => _beginEnterSubject ?? (_beginEnterSubject = new Subject<Unit>());
@@ -153,7 +154,10 @@ namespace EasyUI
             _beginExitSubject?.OnNext(Unit.Default);
             await OnExit();
             // 还原异形屏适配效果，避免Panel实例重用时不断OnEnter适配过头
-            AdaptNotch(-1);
+            if (_resetNotchOnExit)
+            {
+                AdaptNotch(-1);
+            }
             _endExitSubject?.OnNext(Unit.Default);
         }
 
