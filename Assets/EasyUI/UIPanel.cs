@@ -84,31 +84,7 @@ namespace EasyUI
         Subject<Unit> _endEnterForegroundSubject;
         public IObservable<Unit> onEndEnterForeground => _endEnterForegroundSubject ?? (_endEnterForegroundSubject = new Subject<Unit>());
 
-        private UIStack _uiStack;
-
-        public UIStack uiStack
-        {
-            get => _uiStack;
-            internal set
-            {
-                _uiStack = value;
-                if (_safeArea != null)
-                {
-                    return;
-                }
-
-                var canvasRectTransform = _uiStack.GetComponent<RectTransform>();
-                float heightFactor = Screen.height / canvasRectTransform.rect.height;
-                float widthFactor = Screen.width / canvasRectTransform.rect.width;
-                _safeArea = new SafeArea
-                {
-                    topOffset = (Screen.height - Screen.safeArea.yMax) * heightFactor,
-                    bottomOffset = Screen.safeArea.yMin * heightFactor,
-                    leftOffset = Screen.safeArea.xMin * widthFactor,
-                    rightOffset = (Screen.width - Screen.safeArea.xMax)  * widthFactor
-                };
-            }
-        }
+        public UIStack uiStack { get; internal set; }
         
         public RectTransform rectTransform { get; private set; }
         Animator _animator;
@@ -169,6 +145,11 @@ namespace EasyUI
 
         public async UniTask Exit()
         {
+            if (_safeArea == null)
+            {
+                InitSafeArea(uiStack.transform);    
+            }
+            
             _beginExitSubject?.OnNext(Unit.Default);
             await OnExit();
             // 还原异形屏适配效果，避免Panel实例重用时不断OnEnter适配过头
@@ -284,5 +265,16 @@ namespace EasyUI
         /// 获取被当前界面盖住的界面
         /// </summary>
         public UIPanel underPanel => GetUnderPanel(transform.GetSiblingIndex());
+
+        public static void InitSafeArea(Transform canvasTransform)
+        {
+            _safeArea = new SafeArea
+            {
+                topOffset = (Screen.height - Screen.safeArea.yMax) / canvasTransform.localScale.y,
+                bottomOffset = Screen.safeArea.yMin / canvasTransform.localScale.y,
+                leftOffset = Screen.safeArea.xMin / canvasTransform.localScale.x,
+                rightOffset = (Screen.width - Screen.safeArea.xMax)  / canvasTransform.localScale.x
+            };
+        }
     }
 }
