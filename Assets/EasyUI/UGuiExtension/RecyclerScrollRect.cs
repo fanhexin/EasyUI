@@ -158,13 +158,16 @@ namespace EasyUI.UGuiExtension
             FillContent();
         }
         
-        public void Reload()
+        public void Reload(bool scrollToTop = true)
         {
             ReturnItems();
             Load();
 
             // 无论之前滚动到哪，回到顶部
-            normalizedPosition = new Vector2{[_orientation] = _orientation};
+            if (scrollToTop)
+            {
+                normalizedPosition = new Vector2{[_orientation] = _orientation};
+            }
         }
 
         void ReturnItems()
@@ -212,7 +215,7 @@ namespace EasyUI.UGuiExtension
             for (int i = 0; i < _capacityCnt; i++)
             {
                 RectTransform item = _itemPool.Rent().GetComponent<RectTransform>();
-                item.anchoredPosition = GetItemPos(i);
+                SetItemPos(item, i);
                 if (_isFooterExisting)
                 {
                     item.SetSiblingIndex(_footer.GetSiblingIndex());
@@ -220,6 +223,16 @@ namespace EasyUI.UGuiExtension
                 adapter.OnBindView(i, item);
                 _itemLinkedList.AddLast((i, item));
             }
+        }
+
+        void SetItemPos(RectTransform rectTransform, int index)
+        {
+            Vector2 pos = GetItemPos(index);
+            if (rectTransform.anchorMin.y * rectTransform.anchorMax.y >= 1)
+            {
+               pos.y -= content.rect.height * 0.5f;
+            }
+            rectTransform.anchoredPosition = pos;
         }
 
         Vector2 GetItemPos(int index)
@@ -333,7 +346,7 @@ namespace EasyUI.UGuiExtension
                 while (item != null && topIndex < adapter.ItemCount)
                 {
                     var v = item.Value;
-                    v.rectTrans.anchoredPosition = GetItemPos(topIndex);
+                    SetItemPos(v.rectTrans, topIndex);
                     adapter.OnBindView(topIndex, v.rectTrans);
                     item.Value = (topIndex, v.rectTrans);
                     ++topIndex;
@@ -346,7 +359,7 @@ namespace EasyUI.UGuiExtension
             while (item != null && item.Value.index < topIndex && bottomIndex < adapter.ItemCount - 1)
             {
                 var v = item.Value;
-                v.rectTrans.anchoredPosition = GetItemPos(++bottomIndex);
+                SetItemPos(v.rectTrans, ++bottomIndex);
                 adapter.OnBindView(bottomIndex, v.rectTrans);
                 _itemLinkedList.RemoveFirst();
                 _itemLinkedList.AddLast((bottomIndex, v.rectTrans));
@@ -366,7 +379,7 @@ namespace EasyUI.UGuiExtension
                  while (item != null && bottomIndex >= 0)
                  {
                      var v = item.Value;
-                     v.rectTrans.anchoredPosition = GetItemPos(bottomIndex);
+                     SetItemPos(v.rectTrans, bottomIndex);
                      adapter.OnBindView(bottomIndex, v.rectTrans);
                      item.Value = (bottomIndex, v.rectTrans);
                      --bottomIndex;
@@ -379,7 +392,7 @@ namespace EasyUI.UGuiExtension
              while (item != null && item.Value.index > bottomIndex && topIndex > 0)
              {
                  var v = item.Value;
-                 v.rectTrans.anchoredPosition = GetItemPos(--topIndex);
+                 SetItemPos(v.rectTrans, --topIndex);
                  adapter.OnBindView(topIndex, v.rectTrans);
                  _itemLinkedList.RemoveLast();
                  _itemLinkedList.AddFirst((topIndex, v.rectTrans));
