@@ -186,21 +186,36 @@ namespace EasyUI
         /// <param name="arg">输入参数值</param>
         /// <typeparam name="T">输入参数类型</typeparam>
         /// <returns></returns>
-        public async UniTask<UIPanel> DoTransition<T>(Transition transition, T arg = default)
+        public UniTask<UIPanel> DoTransition<T>(Transition transition, T arg = default)
+        {
+            return DoTransition(transition.destPanelName, transition.operation, transition.disableUnderPanel, arg);
+        }
+
+        public async UniTask<UIPanel> DoTransition<T>(string panelName,
+            Transition.Operation operation = Transition.Operation.Push, 
+            bool disableUnderPanel = true, 
+            T arg = default)
         {
             // 在Factory创建Panel之前就要禁用触控，否则快速点击时可能会创建多个相同Panel
             interactable = false;
-            var panel = await _panelFactory.CreatePanelAsync(transition.destPanelName);
+            var panel = await _panelFactory.CreatePanelAsync(panelName);
             panel.TransferParameter(arg);
-            await DoOperation(panel, transition);
+            await DoOperation(panel, operation, disableUnderPanel);
             return panel;
         }
 
-        public async UniTask<UIPanel> DoTransition(Transition transition)
+        public UniTask<UIPanel> DoTransition(Transition transition)
+        {
+            return DoTransition(transition.destPanelName, transition.operation, transition.disableUnderPanel);
+        }
+
+        public async UniTask<UIPanel> DoTransition(string panelName,
+            Transition.Operation operation = Transition.Operation.Push,
+            bool disableUnderPanel = true)
         {
             interactable = false;
-            var panel = await _panelFactory.CreatePanelAsync(transition.destPanelName);
-            await DoOperation(panel, transition);
+            var panel = await _panelFactory.CreatePanelAsync(panelName);
+            await DoOperation(panel, operation, disableUnderPanel);
             return panel;
         }
 
@@ -230,15 +245,15 @@ namespace EasyUI
             return await panel.ReturnValue<R>();
         }
 
-        async UniTask DoOperation(UIPanel panel, Transition transition)
+        async UniTask DoOperation(UIPanel panel, Transition.Operation operation, bool disableUnderPanel)
         {
-            if (transition.operation == Transition.Operation.Push)
+            if (operation == Transition.Operation.Push)
             {
-                await Push(panel, transition.disableUnderPanel);
+                await Push(panel, disableUnderPanel);
             }
-            else if (transition.operation == Transition.Operation.Replace)
+            else if (operation == Transition.Operation.Replace)
             {
-                await Replace(panel, transition.disableUnderPanel);
+                await Replace(panel, disableUnderPanel);
             }
         }
     }
