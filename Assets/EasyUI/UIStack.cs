@@ -74,7 +74,7 @@ namespace EasyUI
             }
         }
 
-        private async UniTask Push(UIPanel panel, bool disableUnderPanel = true)
+        async UniTask Push(UIPanel panel, bool disableUnderPanel = true)
         {
             if (_isPushing)
             {
@@ -95,14 +95,14 @@ namespace EasyUI
             await Push(uiPanel, ifDisableUnderPanel);
         }
 
-        async Task InternalPush(UIPanel panel, bool disableUnderPanel)
+        async Task InternalPush(UIPanel panel, bool disableUnderPanel, bool underPanelEnterBackground = true)
         {
             _beginPushSubject?.OnNext(panel);
             _isPushing = true;
             interactable = false;
             panel.uiStack = this;
             panel.transform.SetParent(transform, false);
-            if (_panels.Count > 0)
+            if (_panels.Count > 0 && underPanelEnterBackground)
             {
                 await _panels.Peek().EnterBackground(panel);
             }
@@ -173,10 +173,10 @@ namespace EasyUI
             _isPoping = false;
         }
 
-        private async UniTask Replace(UIPanel panel, bool disableUnderPanel = true)
+        async UniTask Replace(UIPanel panel, bool disableUnderPanel = true)
         {
-            await Pop(1, disableUnderPanel);
-            await Push(panel, disableUnderPanel);
+            InternalPop(1, disableUnderPanel, false);
+            await InternalPush(panel, disableUnderPanel, false);
         }
 
         /// <summary>
