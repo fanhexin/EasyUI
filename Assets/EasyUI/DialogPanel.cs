@@ -10,6 +10,9 @@ namespace EasyUI
     {
         [SerializeField] bool _tapMaskClose;
 
+        bool _beCovered;
+        bool _beDisabled;
+
         protected Image GetMask()
         {
             var item = uiStack.transform.GetChild(transform.GetSiblingIndex() - 1);
@@ -90,6 +93,53 @@ namespace EasyUI
             Image img = go.AddComponent<Image>();
             img.color = Settings.instance.dialogBkgColor;
             return img;
+        }
+
+        protected override UniTask OnEnterBackground(UIPanel pushPanel)
+        {
+            _beCovered = true;
+            return base.OnEnterBackground(pushPanel);
+        }
+
+        protected override UniTask OnEnterForeground(UIPanel popPanel)
+        {
+            _beCovered = false;
+            return base.OnEnterForeground(popPanel);
+        }
+
+        protected virtual void OnEnable()
+        {
+            if (!_beDisabled)
+            {
+                return;
+            }
+
+            _beDisabled = false;
+            SetMaskAndUnderPanelActive(true);
+        }
+
+        protected virtual void OnDisable()
+        {
+            if (!_beCovered)
+            {
+                return;
+            }
+            
+            _beDisabled = true;
+            SetMaskAndUnderPanelActive(false);
+        }
+
+        void SetMaskAndUnderPanelActive(bool b)
+        {
+            int index = transform.GetSiblingIndex();
+            uiStack.transform.GetChild(index - 1).gameObject.SetActive(b);
+            
+            index -= 2;
+            if (index < 0)
+            {
+                return;
+            }
+            uiStack.transform.GetChild(index).gameObject.SetActive(b);
         }
     }
 }
