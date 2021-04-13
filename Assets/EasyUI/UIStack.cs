@@ -5,12 +5,11 @@ using System.Threading.Tasks;
 using UniRx;
 using UniRx.Async;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace EasyUI
 {
-    [RequireComponent(typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster))]
+    [RequireComponent(typeof(CanvasScaler), typeof(GraphicRaycaster), typeof(CanvasGroup))]
     public class UIStack : MonoBehaviour
     {
         [SerializeField] PanelFactory _panelFactory;
@@ -38,12 +37,12 @@ namespace EasyUI
         readonly Lazy<Queue<int>> _needPopNums = new Lazy<Queue<int>>(() => new Queue<int>());
 
         bool _isPushing;
-        bool _isPoping;
-        EventSystem _eventSystem;
-
+        bool _isPopping;
+        CanvasGroup _canvasGroup;
+        
         bool interactable
         {
-            set => _eventSystem.gameObject.SetActive(value);
+            set => _canvasGroup.blocksRaycasts = value;
         }
 
 #if UNITY_EDITOR
@@ -61,7 +60,8 @@ namespace EasyUI
         
         async void Awake()
         {
-            _eventSystem = FindObjectOfType<EventSystem>();
+            _canvasGroup = GetComponent<CanvasGroup>();
+            
             if (_isPushing)
             {
                 return;
@@ -127,7 +127,7 @@ namespace EasyUI
                 throw new ArgumentOutOfRangeException();
             }
 
-            if (_isPoping)
+            if (_isPopping)
             {
                 _needPopNums.Value.Enqueue(num);
                 return;
@@ -145,7 +145,7 @@ namespace EasyUI
 
         async Task InternalPop(int num = 1, bool disableUnderPanel = false, bool underPanelEnterForeground = true)
         {
-            _isPoping = true;
+            _isPopping = true;
             interactable = false;
             for (int i = 0; i < num; i++)
             {
@@ -170,7 +170,7 @@ namespace EasyUI
             }
 
             interactable = true;
-            _isPoping = false;
+            _isPopping = false;
         }
 
         async UniTask Replace(UIPanel panel, bool disableUnderPanel = true)
