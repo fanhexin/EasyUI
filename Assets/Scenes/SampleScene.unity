@@ -494,6 +494,8 @@ MonoBehaviour:
     _disableUnderPanel: 1
     _operation: 0
     _triggerBtn: {fileID: 14180685}
+  _notchAdapters: []
+  _resetNotchOnExit: 0
   _toGreenPanel:
     _destPanelName: 
     _disableUnderPanel: 0
@@ -1544,6 +1546,7 @@ GameObject:
   - component: {fileID: 1982530375}
   - component: {fileID: 1982530374}
   - component: {fileID: 1982530373}
+  - component: {fileID: 1982530378}
   - component: {fileID: 1982530377}
   m_Layer: 5
   m_Name: Canvas
@@ -1646,6 +1649,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _panelFactory: {fileID: 11400000, guid: 54fc3f6ef8af84015b021fef76c237d2, type: 2}
   _defaultAnimation: {fileID: 11400000, guid: dc296be8213ab4d47bc30c167d5a9e5e, type: 2}
+--- !u!225 &1982530378
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1982530372}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &2108342937
 GameObject:
   m_ObjectHideFlags: 0
