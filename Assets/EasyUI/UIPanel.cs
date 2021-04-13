@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using UniRx;
-using UniRx.Async;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,11 +22,11 @@ namespace EasyUI
         [Serializable]
         public class NotchAdapter
         {
-            [SerializeField] private RectTransform _target;
-            [SerializeField] private bool _adjustTopOffset;
-            [SerializeField] private bool _adjustBottomOffset;
-            [SerializeField] private bool _adjustLeftOffset;
-            [SerializeField] private bool _adjustRightOffset;
+            [SerializeField] RectTransform _target;
+            [SerializeField] bool _adjustTopOffset;
+            [SerializeField] bool _adjustBottomOffset;
+            [SerializeField] bool _adjustLeftOffset;
+            [SerializeField] bool _adjustRightOffset;
 
             public void Apply(int direction)
             {
@@ -58,7 +58,7 @@ namespace EasyUI
         }
         
         [SerializeField] BindingTransition[] _bindingTransitions;
-        [SerializeField] private NotchAdapter[] _notchAdapters;
+        [SerializeField] NotchAdapter[] _notchAdapters;
         [SerializeField, Tooltip("OnExit时是否重置异形屏适配效果")] bool _resetNotchOnExit;
 
         Subject<Unit> _beginEnterSubject;
@@ -131,7 +131,7 @@ namespace EasyUI
         /// 异形屏适配
         /// </summary>
         /// <param name="direction">取1或-1</param>
-        private void AdaptNotch(int direction = 1)
+        void AdaptNotch(int direction = 1)
         {
             if (_notchAdapters == null)
             {

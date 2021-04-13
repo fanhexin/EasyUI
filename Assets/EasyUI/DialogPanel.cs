@@ -1,5 +1,5 @@
+using Cysharp.Threading.Tasks;
 using UniRx;
-using UniRx.Async;
 using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.UI;

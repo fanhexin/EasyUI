@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.cysharp.unitask": "1.2.0",
+    "com.cysharp.unitask": "2.2.5",
     "com.neuecc.unirx": "7.1.0",
     "com.unity.package-manager-ui": "2.0.8",
     "com.unity.modules.ai": "1.0.0",

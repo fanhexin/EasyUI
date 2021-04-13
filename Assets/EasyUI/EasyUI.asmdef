@@ -2,7 +2,7 @@
     "name": "EasyUI",
     "references": [
         "UniRx",
-        "UniRx.Async"
+        "UniTask"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],
